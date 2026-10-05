@@ -217,7 +217,7 @@
     } catch (e) { return { ...base, limited: !!e.rate }; }
   }
 
-  const MAX_FILES = 300, MAX_BYTES = 8 * 1024 * 1024;
+  const MAX_FILES = 1000, MAX_BYTES = 64 * 1024 * 1024;
   function bytesToB64(buf) {
     const bytes = new Uint8Array(buf);
     let bin = '';

@@ -107,7 +107,7 @@ O catálogo só lê o seu nome e a sua foto públicos.
 - A sua máquina conversa direto com o GitHub (dados e arquivos das skills) e com o serviço de tradução; o dono do site não recebe nada disso.
 - A permissão de pasta é do navegador: o site só escreve na pasta que você escolheu, e você pode revogar quando quiser nas configurações do Chrome.
 - **Uma skill pode trazer scripts e instruções que o Claude executa na sua máquina.** Leia o `SKILL.md`, olhe as estrelas e a data do repositório e instale só de origens em que você confia. O catálogo apenas aponta para as skills e baixa os arquivos direto da origem; ele não as hospeda.
-- Salvaguardas do instalador: caminhos de arquivo são validados (nada de `..`), uma instalação que falha no meio é desfeita, e há um limite de 300 arquivos / 8 MB por skill.
+- Salvaguardas do instalador: caminhos de arquivo são validados (nada de `..`), uma instalação que falha no meio é desfeita, e há um limite de 1000 arquivos / 64 MB por skill.
 
 ## Limitações conhecidas
 
