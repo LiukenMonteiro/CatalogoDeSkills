@@ -1,0 +1,1572 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%%TITLE%%</title>
+<meta name="description" content="%%DESCRIPTION%%">
+<meta property="og:type" content="website">
+<meta property="og:title" content="%%TITLE%%">
+<meta property="og:description" content="%%DESCRIPTION%%">
+<meta property="og:url" content="%%SITE_URL%%">
+<meta property="og:image" content="%%SITE_URL%%og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="%%TITLE%%">
+<meta name="twitter:description" content="%%DESCRIPTION%%">
+<meta name="twitter:image" content="%%SITE_URL%%og.png">
+<meta name="theme-color" content="#0a0a09">
+<!--CATALOGO-CONFIG-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%230a0a09%27/%3E%3Cpath d=%27M16 5l11 11-11 11L5 16z%27 fill=%27%23ff6a00%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a09;
+    --panel: #121210;
+    --panel-2: #191916;
+    --line: #2b2a26;
+    --text: #f3efe8;
+    --muted: #8f897e;
+    --orange: #ff6a00;
+    --orange-hot: #ff8a2b;
+    --orange-deep: #b84a00;
+    --err: #ff5d4d;
+
+    --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+    --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --maxw: 1560px;
+    --gutter: clamp(16px, 3.4vw, 64px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--black); color: var(--text);
+    font: 400 15px/1.55 var(--body); font-variation-settings: "wdth" 100;
+    -webkit-font-smoothing: antialiased;
+  }
+  [hidden] { display: none !important; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+  ::selection { background: var(--orange); color: var(--black); }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+
+  /* ---------- barra superior ---------- */
+  .top { border-bottom: 1px solid var(--line); }
+  .top .wrap { display: flex; align-items: center; gap: 20px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-variation-settings: "wdth" 75; font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; background: none; border: 0; padding: 0; }
+  .brand i { width: 14px; height: 14px; background: var(--orange); display: block; transform: rotate(45deg); }
+  .search { margin-left: auto; position: relative; width: min(420px, 100%); }
+  .search input {
+    width: 100%; height: 40px; padding: 0 44px 0 14px; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 4px; font: 400 14px var(--mono);
+  }
+  .search input::placeholder { color: var(--muted); }
+  .search input:focus { outline: none; border-color: var(--orange); }
+  .search kbd {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 500 11px var(--mono);
+    color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px; pointer-events: none;
+  }
+  .lang {
+    flex: none; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 11px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 4px; font: 500 12px var(--mono); color: var(--muted); transition: border-color .15s;
+  }
+  .lang:hover, .lang:focus-within { border-color: var(--orange); }
+  .lang svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; flex: none; }
+  .lang select { background: transparent; border: 0; color: var(--text); font: 500 13px var(--mono); cursor: pointer; max-width: 170px; padding: 8px 4px; }
+  .lang select:focus { outline: none; }
+  .lang select option { background: var(--panel); color: var(--text); }
+  .me-btn {
+    flex: none; display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 14px 0 10px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font: 500 13px var(--mono); color: var(--text);
+    transition: border-color .15s;
+  }
+  .me-btn:hover { border-color: var(--orange); }
+  .me-btn[aria-current="true"] { background: var(--orange); border-color: var(--orange); color: var(--black); }
+  .me-btn img, .me-btn .ph { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: var(--line); flex: none; }
+  .me-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; flex: none; }
+  .me-btn span { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me-btn span.ph { max-width: none; display: block; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 56px 0 64px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  h1 {
+    margin: 0; font-family: var(--display); font-weight: 850; font-variation-settings: "wdth" 62;
+    font-size: clamp(54px, 8.4vw, 150px); line-height: .88; letter-spacing: -.005em; text-transform: uppercase;
+  }
+  h1 em { font-style: normal; color: var(--orange); }
+  .lede { margin: 28px 0 0; max-width: 520px; font-size: 17px; color: #cfc9be; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .plate {
+    background: var(--orange); color: var(--black); border-radius: 6px; padding: 0;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.7; position: relative; overflow: hidden;
+    box-shadow: 10px 10px 0 var(--orange-deep);
+  }
+  .plate-head { display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 2px solid var(--black); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .plate-body { padding: 18px; min-height: 230px; }
+  .plate .cmd::before { content: "$ "; font-weight: 600; }
+  .plate ul { list-style: none; margin: 8px 0 0; padding: 0; columns: 2; column-gap: 20px; }
+  .plate li { break-inside: avoid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .plate li.more { opacity: .65; }
+  .plate .empty { margin: 8px 0 0; font-weight: 500; }
+  .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--black); vertical-align: -.18em; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .rise { opacity: 0; transform: translateY(6px); animation: rise .4s ease forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  /* ---------- barra de opções (centralizada) ---------- */
+  .tabs-wrap { position: sticky; top: 0; z-index: 10; background: rgba(10,10,9,.94); backdrop-filter: blur(10px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .tabs { display: flex; justify-content: safe center; gap: 6px; overflow-x: auto; padding: 12px var(--gutter); max-width: var(--maxw); margin: 0 auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs-wrap.scroll { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); }
+  .tab {
+    flex: none; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 7px 13px;
+    font: 500 13px var(--mono); color: var(--muted); transition: color .15s, border-color .15s;
+  }
+  .tab:hover { color: var(--text); border-color: var(--muted); }
+  .tab[aria-current="true"] { background: var(--orange); border-color: var(--orange); color: var(--black); font-weight: 600; }
+  .tab small { font: inherit; opacity: .7; margin-left: 6px; }
+  .tab small.pill { opacity: 1; background: var(--orange); color: var(--black); border-radius: 9px; padding: 0 6px; font-weight: 600; }
+  .tab[aria-current="true"] small.pill { background: var(--black); color: var(--orange); }
+
+  /* ---------- lista ---------- */
+  main { padding: 36px 0 96px; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .head h2 { margin: 0; font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 34px; text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
+  .head span { font: 400 13px var(--mono); color: var(--muted); }
+  .head { flex-wrap: wrap; }
+  .headr { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .refresh { gap: 8px; height: 36px; padding: 0 16px; font-size: 13px; }
+  .refresh svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .refresh.busy svg { animation: turn 1s linear infinite; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 12px; }
+  .card {
+    position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; min-height: 132px;
+    transition: border-color .15s, background .15s, transform .15s; opacity: 0; animation: rise .35s ease forwards;
+  }
+  .card:hover { border-color: var(--orange); background: var(--panel-2); transform: translateY(-2px); }
+  .card-main {
+    display: flex; flex-direction: column; gap: 4px; width: 100%; height: 100%; min-height: 130px; text-align: left;
+    background: none; border: 0; padding: 18px 18px 16px; border-radius: 6px;
+  }
+  .card .name { font-family: var(--display); font-variation-settings: "wdth" 80; font-weight: 700; font-size: 19px; line-height: 1.15; word-break: break-word; padding-right: 44px; }
+  .card.two .name { padding-right: 80px; }
+  .card .src { font: 400 12px var(--mono); color: var(--muted); word-break: break-all; }
+  .card .desc2 { margin-top: 4px; font-size: 13px; line-height: 1.45; color: #b9b3a8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .foot { margin-top: auto; padding-top: 14px; display: flex; align-items: center; gap: 12px; font: 500 12px var(--mono); color: var(--muted); min-height: 32px; }
+  .bar { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--orange); }
+  .tag.new { background: transparent; color: var(--orange); border: 1px solid var(--orange); }
+  .hotup { color: var(--orange); }
+  .tag { font: 600 10.5px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--black); background: var(--orange); padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+
+  .card-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 2px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; min-width: 32px; padding: 0 7px;
+    background: none; border: 0; border-radius: 4px; color: var(--muted); font: 600 11.5px var(--mono);
+    transition: color .15s, background .15s;
+  }
+  .icon-btn:hover { color: var(--text); background: var(--line); }
+  .icon-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; flex: none; }
+  .icon-btn[aria-pressed="true"] { color: var(--orange); }
+  .icon-btn[aria-pressed="true"] svg { fill: var(--orange); }
+  .icon-btn.danger:hover, .icon-btn.confirm { color: var(--black); background: var(--err); }
+  .icon-btn span { display: none; }
+  .icon-btn.confirm span { display: inline; }
+
+  .state { grid-column: 1 / -1; padding: 72px 0; text-align: center; color: var(--muted); }
+  .state p { margin: 0 auto 16px; max-width: 460px; }
+  .skeleton { height: 132px; border-radius: 6px; background: linear-gradient(90deg, var(--panel), var(--panel-2), var(--panel)); background-size: 200% 100%; animation: sh 1.3s linear infinite; border: 1px solid var(--line); }
+  @keyframes sh { to { background-position: -200% 0; } }
+
+  /* ---------- perfil ---------- */
+  .phead { display: flex; align-items: center; gap: 24px; padding: 48px 0 40px; flex-wrap: wrap; }
+  .avatar { width: 96px; height: 96px; border-radius: 6px; border: 2px solid var(--orange); object-fit: cover; background: var(--panel); flex: none; box-shadow: 6px 6px 0 var(--orange-deep); }
+  .avatar.ph { display: grid; place-items: center; font: 800 44px var(--display); font-variation-settings: "wdth" 62; color: var(--orange); }
+  .who { flex: 1; min-width: 240px; }
+  .who h2 { margin: 0; font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 850; font-size: clamp(40px, 5.6vw, 76px); line-height: .92; text-transform: uppercase; word-break: break-word; }
+  .who p { margin: 8px 0 0; font: 500 14px var(--mono); color: var(--orange); }
+  .who p.muted { color: var(--muted); font-weight: 400; max-width: 520px; }
+
+  /* ---------- painel lateral e janela ---------- */
+  dialog { background: var(--panel); color: var(--text); border: 0; padding: 0; }
+  dialog::backdrop { background: rgba(0,0,0,.68); backdrop-filter: blur(3px); }
+  dialog.drawer { margin: 0 0 0 auto; height: 100vh; max-height: none; width: min(540px, 100vw); max-width: none; border-left: 2px solid var(--orange); }
+  dialog.drawer[open] { animation: slide .28s cubic-bezier(.2,.8,.2,1); }
+  @keyframes slide { from { transform: translateX(40px); opacity: 0; } }
+  dialog.modal { margin: auto; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); border: 2px solid var(--orange); border-radius: 6px; box-shadow: 10px 10px 0 var(--orange-deep); }
+  .dlg { padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 20px; min-height: 100%; }
+  .modal .dlg { min-height: 0; padding: 30px; }
+  .close { position: absolute; top: 16px; right: 18px; width: 36px; height: 36px; border: 1px solid var(--line); background: var(--black); border-radius: 4px; font-size: 18px; line-height: 1; }
+  .close:hover { border-color: var(--orange); color: var(--orange); }
+  .dlg h3 { margin: 12px 44px 0 0; font-family: var(--display); font-variation-settings: "wdth" 66; font-weight: 850; font-size: 46px; line-height: .95; text-transform: uppercase; word-break: break-word; }
+  .modal .dlg h3 { font-size: 36px; margin-top: 0; }
+  .repo { display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--black); border: 1px solid var(--line); border-radius: 6px; text-decoration: none; transition: border-color .15s; }
+  .repo:hover { border-color: var(--orange); }
+  .repo img { width: 44px; height: 44px; border-radius: 4px; background: var(--line); flex: none; }
+  .repo b { display: block; font: 600 14px var(--mono); word-break: break-all; }
+  .repo small { display: block; margin-top: 2px; font: 400 12px var(--mono); color: var(--muted); }
+  .rlinks { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+  .rlinks a { font: 500 13px var(--mono); color: var(--orange); text-decoration: none; }
+  .rlinks a:hover { text-decoration: underline; }
+  .desc { margin: 0; font-size: 16px; line-height: 1.6; color: #d8d2c7; }
+  .desc.loading { color: var(--muted); }
+  .trnote { margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font: 400 12px var(--mono); color: var(--muted); }
+  .trnote.err { color: var(--err); }
+  .card .desc2.tr-wait { opacity: .55; }
+  dl { margin: 0; border-top: 1px solid var(--line); }
+  dl div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); font: 400 13px var(--mono); }
+  dt { color: var(--muted); flex: none; }
+  dd { margin: 0; text-align: right; word-break: break-all; }
+
+  .btn {
+    width: 100%; height: 52px; border-radius: 4px; border: 2px solid var(--orange); background: var(--orange); color: var(--black);
+    font-family: var(--display); font-variation-settings: "wdth" 80; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: .06em;
+    transition: background .15s, color .15s; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+  }
+  .btn:hover:not(:disabled) { background: var(--orange-hot); border-color: var(--orange-hot); }
+  .btn.ghost { background: transparent; color: var(--orange); }
+  .btn.ghost:hover:not(:disabled) { background: var(--orange); color: var(--black); border-color: var(--orange); }
+  .btn:disabled { opacity: .55; cursor: progress; }
+  .btn.small { width: auto; height: 38px; padding: 0 20px; font-size: 14px; }
+  .btn.quiet { border-color: var(--line); background: none; color: var(--text); }
+  .btn.quiet:hover:not(:disabled) { background: none; border-color: var(--muted); }
+
+  .toggle {
+    display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; height: 44px; background: none; border: 1px solid var(--line);
+    border-radius: 4px; font: 500 13px var(--mono); color: var(--text); transition: border-color .15s, color .15s;
+  }
+  .toggle svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+  .toggle:hover { border-color: var(--muted); }
+  .toggle[aria-pressed="true"] { border-color: var(--orange); color: var(--orange); }
+  .toggle[aria-pressed="true"] svg { fill: var(--orange); }
+
+  .log { background: var(--black); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; font: 400 12.5px/1.7 var(--mono); color: var(--muted); display: none; word-break: break-all; }
+  .log.show { display: block; }
+  .log .ok { color: var(--orange); }
+  .log .bad { color: var(--err); }
+  .log .cmd { color: var(--text); }
+  .log .cmd::before { content: "$ "; color: var(--orange); }
+  .spin::after { content: "⠋"; animation: spin .8s steps(1) infinite; color: var(--orange); margin-left: 6px; }
+  @keyframes spin { 12% { content: "⠙"; } 25% { content: "⠹"; } 37% { content: "⠸"; } 50% { content: "⠼"; } 62% { content: "⠴"; } 75% { content: "⠦"; } 87% { content: "⠧"; } }
+
+  details summary { cursor: pointer; font: 500 13px var(--mono); color: var(--muted); }
+  details summary:hover { color: var(--text); }
+  details pre { margin: 12px 0 0; background: var(--black); border: 1px solid var(--line); border-radius: 4px; padding: 14px; max-height: 280px; overflow: auto; font: 400 12px/1.6 var(--mono); white-space: pre-wrap; word-break: break-word; color: #cfc9be; }
+  .note { margin: auto 0 0; padding-top: 8px; font-size: 12.5px; color: var(--muted); }
+  .note.free { margin: 28px 0 0; }
+  .note.flat { margin: 0; padding: 0; }
+  .star-btn { flex: none; display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font: 500 13px var(--mono); color: var(--text); text-decoration: none; transition: border-color .15s; }
+  .star-btn:hover { border-color: var(--orange); }
+  .star-btn svg { width: 16px; height: 16px; fill: var(--orange); }
+  .star-btn b { font-weight: 600; }
+  .starcta { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 14px; background: var(--orange); color: var(--black); border-radius: 4px; font: 600 13px var(--mono); text-decoration: none; }
+  .starcta:hover { background: var(--orange-hot); }
+  footer.foot { border-top: 1px solid var(--line); padding: 28px 0 44px; color: var(--muted); font: 400 13px/1.7 var(--mono); }
+  footer.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center; justify-content: space-between; }
+  footer.foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line); }
+  footer.foot a:hover { color: var(--orange); border-color: var(--orange); }
+  .plate-btn { margin-top: 12px; background: var(--black); color: var(--orange); border: 0; border-radius: 4px; padding: 9px 14px; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+  .plate-btn:hover { color: var(--text); }
+  .row-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pactions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .pactions .btn { height: 34px; padding: 0 14px; font-size: 12.5px; }
+  .pf-row { display: flex; gap: 16px; align-items: flex-end; }
+  .pf-avatar { width: 72px; height: 72px; border-radius: 6px; border: 2px solid var(--orange); object-fit: cover; background: var(--black); flex: none; display: grid; place-items: center; font: 800 32px var(--display); color: var(--orange); }
+  .pf-field { flex: 1; min-width: 0; }
+  .pf-label { display: block; margin-bottom: 6px; font: 500 12px var(--mono); color: var(--muted); }
+  .pf-line { display: flex; gap: 10px; }
+  .pf-line .field { flex: 1; min-width: 0; }
+  .pf-line .btn { width: auto; height: 46px; padding: 0 16px; font-size: 14px; }
+  .steps li code { word-break: break-all; }
+  #dStar[hidden], #dNote[hidden] { display: none; }
+
+  /* login */
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+  .steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: #d8d2c7; font-size: 14.5px; }
+  .steps a { color: var(--orange); font-weight: 600; }
+  .steps code { font: 500 12.5px var(--mono); background: var(--black); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; }
+  .field { width: 100%; height: 46px; padding: 0 14px; background: var(--black); border: 1px solid var(--line); border-radius: 4px; color: var(--text); font: 400 14px var(--mono); }
+  .field:focus { outline: none; border-color: var(--orange); }
+  .code { font: 600 40px var(--mono); letter-spacing: .14em; color: var(--orange); text-align: center; padding: 18px 0; background: var(--black); border: 1px dashed var(--orange-deep); border-radius: 4px; user-select: all; }
+  .err { color: var(--err); font: 500 13px var(--mono); margin: 0; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > * { flex: 1; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--muted); font: 500 12.5px var(--mono); text-decoration: underline; text-align: left; width: fit-content; }
+  .linkbtn:hover { color: var(--text); }
+
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: var(--orange); color: var(--black); font: 600 13px var(--mono); padding: 12px 20px; border-radius: 4px; transition: .25s; z-index: 50; max-width: 92vw; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast.err { background: var(--err); }
+
+  @media (max-width: 1100px) { .lang > span { display: none; } }
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 36px; }
+    .plate { box-shadow: 6px 6px 0 var(--orange-deep); }
+  }
+  @media (max-width: 640px) {
+    .top .wrap { gap: 10px; flex-wrap: wrap; height: auto; padding-top: 12px; padding-bottom: 12px; }
+    .brand span { display: none; }
+    .search { order: 3; flex-basis: 100%; width: 100%; margin: 0; }
+    .lang { margin-left: auto; }
+    .lang > span { display: none; }
+    .lang select { max-width: 118px; }
+    .star-btn span { display: none; }
+    .me-btn span:not(.ph) { display: none; }
+    .me-btn { padding: 0 10px; }
+    .hero { padding: 36px 0 44px; }
+    .head h2 { font-size: 28px; }
+    .dlg { padding: 24px 20px 32px; }
+    .dlg h3 { font-size: 38px; }
+    .plate ul { columns: 1; }
+    .phead { padding: 32px 0 28px; gap: 18px; }
+    .avatar { width: 72px; height: 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .cursor { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <button class="brand" id="brand" type="button" aria-label="Ir para o catálogo"><i aria-hidden="true"></i><span>Catálogo de Skills</span></button>
+    <form class="search" id="searchForm" role="search">
+      <input id="q" type="search" placeholder="buscar: react, pdf, testes…" aria-label="Buscar skills" autocomplete="off" spellcheck="false">
+      <kbd aria-hidden="true">/</kbd>
+    </form>
+    <label class="lang" title="Idioma das descrições">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.400-3.900 9c-2.600-2.600-3.900-5.600-3.900-9s1.300-6.400 3.900-9z"/></svg>
+      <span>Descrições</span>
+      <select id="lang" aria-label="Idioma das descrições"></select>
+    </label>
+    <a class="star-btn" id="starBtn" target="_blank" rel="noopener" title="Dar uma estrela no GitHub">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>
+      <span>Estrela</span><b id="starCount"></b>
+    </a>
+    <button class="me-btn" id="meBtn" type="button"></button>
+  </div>
+</header>
+
+<!-- ===== catálogo ===== -->
+<div id="viewCatalog">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Novas habilidades para o seu <em>Claude</em></h1>
+        <p class="lede">Escolha uma skill e clique em instalar. Ela vai para a sua <b>pasta global</b> e passa a valer em todos os projetos, já pronta para usar.</p>
+      </div>
+      <aside class="plate" aria-label="Skills instaladas na sua máquina">
+        <div class="plate-head"><span id="plateDir">~/.claude/skills</span><span id="plateCount">—</span></div>
+        <div class="plate-body" id="plateBody"></div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="tabs-wrap"><nav class="tabs" id="nav" aria-label="Categorias"></nav></div>
+
+  <main>
+    <div class="wrap">
+      <div class="head">
+        <h2 id="title">Populares</h2>
+        <div class="headr">
+          <span id="stamp"></span>
+          <span id="count"></span>
+          <button class="btn small quiet refresh" id="refresh" type="button" title="Atualiza a lista e procura skills novas">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg><span id="refreshLabel">Atualizar</span>
+          </button>
+        </div>
+      </div>
+      <div id="grid" class="grid" aria-live="polite"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== perfil ===== -->
+<div id="viewProfile" hidden>
+  <div class="wrap"><div class="phead" id="pHead"></div></div>
+  <div class="tabs-wrap"><nav class="tabs" id="pTabs" aria-label="Seções do perfil"></nav></div>
+  <main>
+    <div class="wrap">
+      <div class="head"><h2 id="pTitle"></h2><div class="headr"><span id="pCount"></span><span class="pactions" id="pActions"></span></div></div>
+      <div id="pGrid" class="grid" aria-live="polite"></div>
+      <p class="note free" id="pNote"></p>
+    </div>
+  </main>
+</div>
+
+<!-- ===== coleção compartilhada por link ===== -->
+<div id="viewCollection" hidden>
+  <div class="wrap"><div class="phead"><div class="who"><h2 id="cTitle"></h2><p class="muted" id="cSub"></p></div><div class="row-actions" id="cActions"></div></div></div>
+  <main><div class="wrap"><div id="cGrid" class="grid" aria-live="polite"></div></div></main>
+</div>
+
+<footer class="foot"><div class="wrap">
+  <span>Feito por <a id="fAuthor" target="_blank" rel="noopener"></a> · código aberto (MIT)</span>
+  <a id="fRepo" target="_blank" rel="noopener">⭐ Gostou? Deixe uma estrela no GitHub</a>
+  <span>As skills são dos seus autores; este site só aponta para elas.</span>
+</div></footer>
+
+<!-- ===== painel de detalhe ===== -->
+<dialog id="dlg" class="drawer" aria-labelledby="dName">
+  <div class="dlg">
+    <button class="close" id="close" aria-label="Fechar">×</button>
+    <h3 id="dName"></h3>
+    <div id="dRepoBox" hidden>
+      <a class="repo" id="dRepo" target="_blank" rel="noopener">
+        <img id="dAvatar" alt="" width="44" height="44">
+        <span><b id="dRepoName"></b><small id="dRepoStats"></small></span>
+      </a>
+      <div class="rlinks" id="dLinks"></div>
+    </div>
+    <div><p class="desc loading" id="dDesc"></p><div class="trnote" id="dTr" hidden></div></div>
+    <dl>
+      <div id="dInstallsRow"><dt>Instalações</dt><dd id="dInstalls"></dd></div>
+      <div><dt>Destino</dt><dd id="dDest"></dd></div>
+    </dl>
+    <button class="btn" id="dAction" type="button">Instalar</button>
+    <p class="note flat" id="dNote" hidden></p>
+    <button class="toggle" id="dFav" type="button" aria-pressed="false"></button>
+    <div class="log" id="dLog" aria-live="polite"></div>
+    <a class="starcta" id="dStar" target="_blank" rel="noopener" hidden>⭐ Gostou? Deixe uma estrela no GitHub</a>
+    <details id="dPreview" hidden>
+      <summary>Ler o SKILL.md antes de instalar</summary>
+      <pre id="dContent"></pre>
+    </details>
+    <p class="note">Uma skill pode incluir scripts que o Claude executa na sua máquina. Instale só de origens em que você confia.</p>
+  </div>
+</dialog>
+
+<!-- ===== login ===== -->
+<dialog id="loginDlg" class="modal" aria-labelledby="lTitle">
+  <div class="dlg">
+    <button class="close" id="lClose" aria-label="Fechar">×</button>
+    <h3 id="lTitle">Entrar com GitHub</h3>
+    <div class="stack" id="lBody"></div>
+  </div>
+</dialog>
+<!-- ===== pasta de skills (site público) ===== -->
+<dialog id="folderDlg" class="modal" aria-labelledby="fdTitle">
+  <div class="dlg">
+    <button class="close" id="fdClose" aria-label="Fechar">×</button>
+    <h3 id="fdTitle">Escolha a pasta de skills</h3>
+    <div class="stack" id="fdBody"></div>
+  </div>
+</dialog>
+
+<!-- ===== perfil local (site público) ===== -->
+<dialog id="profileDlg" class="modal" aria-labelledby="pfTitle">
+  <div class="dlg">
+    <button class="close" id="pfClose" aria-label="Fechar">×</button>
+    <h3 id="pfTitle">Seu perfil</h3>
+    <div class="stack" id="pfBody"></div>
+  </div>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const CFG = window.CATALOGO || { mode: 'local' };
+const STATIC = CFG.mode === 'static'; // site público: sem servidor, tudo no navegador
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const okAvatar = a => typeof a === 'string' && (/^data:image\/(jpeg|png|webp);base64,/.test(a) || /^https:\/\/(avatars\.githubusercontent\.com|github\.com)\//.test(a));
+const state = {
+  view: 'catalog', category: 'populares', label: 'Populares', query: '', items: [],
+  current: null, dir: '~/.claude/skills', installed: [],
+  pq: '', newCount: 0, refreshedAt: null, lang: 'off', langs: [], tr: new Map(), lists: { favorites: [] }, me: { configured: false, user: null }, ptab: 'instaladas',
+};
+const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1).replace('.0', '') + 'k' : String(n);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const ICON = {
+  heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5l-1.4-1.3C5.4 14.5 2 11.4 2 7.6 2 4.5 4.4 2.5 7 2.5c1.9 0 3.7.9 5 2.4 1.3-1.5 3.1-2.4 5-2.4 2.6 0 5 2 5 5.1 0 3.8-3.4 6.9-8.6 11.6L12 20.5z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  user: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>',
+};
+
+async function api(url, opts) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Erro ' + res.status);
+  return data;
+}
+const post = (url, body = {}) => api(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+let toastTimer;
+function toast(msg, err) {
+  const t = $('toast');
+  t.textContent = msg; t.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3800);
+}
+function el(tag, props = {}, ...kids) {
+  const n = Object.assign(document.createElement(tag), props);
+  n.append(...kids);
+  return n;
+}
+const svgBtn = (cls, label, icon, extra = '') => {
+  const b = el('button', { className: cls, type: 'button', title: label });
+  b.setAttribute('aria-label', label);
+  b.innerHTML = icon + extra;
+  return b;
+};
+
+/* ---------- estado derivado ---------- */
+const sameSkill = (a, b) => a.skillId === b.skillId && a.source === b.source;
+const isFav = s => !!s.source && state.lists.favorites.some(x => sameSkill(x, s));
+const isInst = s => state.installed.some(i => i.skillId === s.skillId && (!i.source || !s.source || i.source === s.source));
+
+async function loadInstalled(animate = false) {
+  try {
+    const d = await api('/api/installed');
+    state.dir = d.dir; state.installed = d.skills;
+    if (STATIC) state.fs = { supported: d.supported, connected: d.connected, granted: d.granted };
+  } catch { /* mantém o que já havia */ }
+  renderPlate(animate);
+  updateProfileCounts();
+}
+async function loadLists() {
+  try { state.lists = await api('/api/lists'); } catch {}
+  updateProfileCounts();
+}
+async function loadMe() {
+  try { state.me = await api('/api/me'); } catch {}
+  renderMeBtn();
+}
+function refreshView() {
+  if (state.view === 'profile') renderProfile(); else render();
+  fadeTabs();
+}
+
+/* ---------- tradução das descrições (nomes nunca são traduzidos) ---------- */
+const trKey = (lang, t) => lang + '\u0000' + t;
+const trGet = t => state.tr.get(trKey(state.lang, t));
+const langLabel = () => (state.langs.find(l => l.code === state.lang) || {}).label || state.lang;
+
+// 1º tradutor embutido do navegador (no seu computador, sem custo nem limite);
+// 2º serviço gratuito pelo servidor, quando o navegador não tem o modelo.
+const hasBrowserTranslator = typeof Translator === 'function';
+const bcp = c => c === 'pt-BR' ? 'pt' : c === 'zh-CN' ? 'zh' : c;
+const translators = new Map();
+const offers = new Map(); // pares que o navegador ainda precisa baixar
+
+function loadSavedTranslations() {
+  try { JSON.parse(localStorage.getItem('catalogo.tr') || '[]').forEach(([k, v]) => state.tr.set(k, v)); } catch {}
+}
+let saveTimer;
+function saveTranslations() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem('catalogo.tr', JSON.stringify([...state.tr].slice(-300))); } catch {}
+  }, 300);
+}
+
+async function detectSource(text) {
+  if (/[\uac00-\ud7af]/.test(text)) return 'ko';
+  if (/[\u3040-\u30ff]/.test(text)) return 'ja';
+  if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+  if (/[\u0400-\u04ff]/.test(text)) return 'ru';
+  if (typeof LanguageDetector === 'function') {
+    try {
+      const det = await (state.detector ||= LanguageDetector.create());
+      const [best] = await det.detect(text);
+      if (best && best.confidence > 0.6 && best.detectedLanguage !== 'und') return best.detectedLanguage;
+    } catch {}
+  }
+  return 'en';
+}
+
+async function browserTranslator(src, tgt) {
+  const key = `${src}>${tgt}`;
+  if (translators.has(key)) return translators.get(key);
+  let av;
+  try { av = await Translator.availability({ sourceLanguage: src, targetLanguage: tgt }); } catch { return null; }
+  if (av === 'downloadable' || av === 'downloading') { offers.set(key, { src, tgt }); return null; } // baixar exige um clique
+  if (av !== 'available') return null;
+  try {
+    const t = await Translator.create({ sourceLanguage: src, targetLanguage: tgt });
+    translators.set(key, t);
+    return t;
+  } catch { return null; }
+}
+
+async function translateBatch(texts, lang) {
+  const tgt = bcp(lang), out = new Array(texts.length).fill(null), rest = [];
+  for (let i = 0; i < texts.length; i++) {
+    const src = await detectSource(texts[i]);
+    if (src === tgt) { out[i] = texts[i]; continue; }
+    const tr = hasBrowserTranslator ? await browserTranslator(src, tgt) : null;
+    if (tr) {
+      try { out[i] = await tr.translate(texts[i]); continue; } catch {}
+    }
+    rest.push(i);
+  }
+  if (rest.length) {
+    const r = await post('/api/translate', { lang, texts: rest.map(i => texts[i]) });
+    rest.forEach((i, k) => { out[i] = r.translations[k]; });
+  }
+  return out;
+}
+
+async function translate(texts) {
+  const lang = state.lang;
+  const need = [...new Set(texts.filter(t => t && !state.tr.has(trKey(lang, t))))];
+  if (need.length) {
+    const r = await translateBatch(need, lang);
+    need.forEach((t, i) => state.tr.set(trKey(lang, t), r[i]));
+    saveTranslations();
+  }
+  return texts.map(t => state.tr.get(trKey(lang, t)));
+}
+
+// Baixa o modelo do navegador (precisa de um clique do usuário).
+async function downloadOfflineModels(btn) {
+  btn.disabled = true;
+  try {
+    for (const [key, { src, tgt }] of [...offers]) {
+      const t = await Translator.create({
+        sourceLanguage: src, targetLanguage: tgt,
+        monitor(m) { m.addEventListener('downloadprogress', e => { btn.textContent = `Baixando… ${Math.round(e.loaded * 100)}%`; }); },
+      });
+      translators.set(key, t); offers.delete(key);
+    }
+    toast('Tradutor offline pronto. As próximas traduções rodam no seu computador.');
+  } catch (e) { toast('Não consegui baixar o tradutor: ' + e.message, true); }
+  btn.disabled = false;
+  if (state.current && $('dlg').open && state.descOrig != null) showDescription(state.current);
+}
+
+async function loadLangs() {
+  try {
+    const d = await api('/api/langs');
+    state.langs = d.langs;
+  } catch {}
+  const valid = c => c === 'off' || state.langs.some(l => l.code === c);
+  let saved = null;
+  try { saved = localStorage.getItem('catalogo.lang'); } catch {}
+  if (!valid(saved)) {
+    // Primeira visita: usa o idioma configurado no navegador.
+    const prefs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']).map(l => l.toLowerCase());
+    const hit = prefs.map(p => state.langs.find(l => l.code.toLowerCase() === p) || state.langs.find(l => l.code.toLowerCase().split('-')[0] === p.split('-')[0])).find(Boolean);
+    saved = hit ? hit.code : 'off';
+  }
+  state.lang = saved;
+  const sel = $('lang');
+  sel.replaceChildren(el('option', { value: 'off', textContent: 'Original (sem tradução)' }), ...state.langs.map(l => el('option', { value: l.code, textContent: l.label })));
+  sel.value = state.lang;
+}
+$('lang').onchange = e => {
+  state.lang = e.target.value;
+  try { localStorage.setItem('catalogo.lang', state.lang); } catch {}
+  refreshView();
+  if (state.current && $('dlg').open && state.descOrig != null) showDescription(state.current);
+};
+
+// Mostra o original já e troca pela tradução quando ela chega.
+async function translateCards(root) {
+  const lang = state.lang;
+  if (lang === 'off') return;
+  const nodes = [...root.querySelectorAll('.desc2[data-orig]')];
+  const apply = () => nodes.forEach(n => { const t = state.tr.get(trKey(lang, n.dataset.orig)); if (t && n.isConnected && state.lang === lang) { n.textContent = t; n.classList.remove('tr-wait'); } });
+  const todo = [...new Set(nodes.map(n => n.dataset.orig).filter(t => !state.tr.has(trKey(lang, t))))];
+  apply();
+  if (!todo.length) return;
+  nodes.forEach(n => { if (!state.tr.has(trKey(lang, n.dataset.orig))) n.classList.add('tr-wait'); });
+  try {
+    for (let i = 0; i < todo.length; i += 15) { await translate(todo.slice(i, i + 15)); apply(); }
+  } catch (e) {
+    nodes.forEach(n => n.classList.remove('tr-wait'));
+    if (state.lang === lang) toast(e.message, true);
+  }
+}
+
+async function showDescription(s) {
+  const orig = state.descOrig, lang = state.lang, box = $('dDesc'), note = $('dTr');
+  box.className = 'desc'; box.textContent = orig;
+  note.hidden = true; note.className = 'trnote'; note.replaceChildren();
+  if (lang === 'off' || !orig || orig.startsWith('(sem descrição')) return;
+  const stale = () => state.current !== s || state.lang !== lang || state.descOrig !== orig;
+  const done = t => {
+    if (stale() || !t || t === orig) { note.hidden = true; return; }
+    box.textContent = t;
+    let shown = true;
+    const toggle = el('button', { className: 'linkbtn', type: 'button', textContent: 'Ver original' });
+    toggle.onclick = () => { shown = !shown; box.textContent = shown ? t : orig; toggle.textContent = shown ? 'Ver original' : 'Ver tradução'; };
+    const kids = [el('span', { textContent: `Tradução automática para ${langLabel()}` }), toggle];
+    if (offers.size) {
+      const dl = el('button', { className: 'linkbtn', type: 'button', textContent: 'Baixar tradutor offline (ilimitado)' });
+      dl.onclick = () => downloadOfflineModels(dl);
+      kids.push(dl);
+    }
+    note.replaceChildren(...kids);
+    note.hidden = false;
+  };
+  const cached = trGet(orig);
+  if (cached !== undefined) return done(cached);
+  note.replaceChildren(el('span', { className: 'spin', textContent: `Traduzindo para ${langLabel()}` }));
+  note.hidden = false;
+  try { done((await translate([orig]))[0]); }
+  catch (e) {
+    if (stale()) return;
+    note.className = 'trnote err';
+    note.replaceChildren(el('span', { textContent: `${e.message} Mostrando o original.` }));
+  }
+}
+
+/* ---------- barra superior ---------- */
+function renderMeBtn() {
+  const u = state.me.user, b = $('meBtn');
+  b.setAttribute('aria-current', String(location.hash.startsWith('#perfil')));
+  if (u && okAvatar(u.avatar)) {
+    b.replaceChildren(el('img', { src: u.avatar, alt: '' }), el('span', { textContent: u.login || u.name }));
+  } else if (u) {
+    b.replaceChildren(el('span', { className: 'ph' }), el('span', { textContent: u.login || u.name }));
+  } else {
+    b.innerHTML = ICON.user; b.append(el('span', { textContent: 'Perfil' }));
+  }
+}
+
+/* ---------- placa laranja: skills instaladas de verdade ---------- */
+function renderPlate(animate) {
+  const names = state.installed.map(s => s.skillId); // o servidor já manda a mais recente primeiro
+  $('plateDir').textContent = state.dir;
+  $('plateCount').textContent = names.length === 1 ? '1 instalada' : `${names.length} instaladas`;
+  const MAX = 14;
+  const step = animate && !reduceMotion ? 70 : 0;
+  let i = 0;
+  const line = n => { n.style.animationDelay = `${i++ * step}ms`; if (step) n.classList.add('rise'); return n; };
+  const kids = [line(el('div', { className: 'cmd', textContent: 'ls -t' }))];
+  if (STATIC && !(state.fs && state.fs.granted)) {
+    $('plateCount').textContent = '—';
+    const can = state.fs && state.fs.supported;
+    kids.push(line(el('p', { className: 'empty', textContent: can ? 'Conecte a pasta de skills para ver as suas instaladas aqui.' : 'Este navegador não lê a sua pasta de skills. No Chrome ou no Edge você instala com um clique.' })));
+    if (can) {
+      const b = el('button', { className: 'plate-btn', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
+      b.onclick = connectFolderUI;
+      kids.push(line(b));
+    }
+  } else if (names.length) {
+    const ul = el('ul');
+    names.slice(0, MAX).forEach(n => ul.append(line(el('li', { textContent: n }))));
+    if (names.length > MAX) ul.append(line(el('li', { className: 'more', textContent: `+ ${names.length - MAX} outras` })));
+    kids.push(ul);
+  } else {
+    kids.push(line(el('p', { className: 'empty', textContent: 'Pasta vazia. Instale a primeira skill abaixo.' })));
+  }
+  kids.push(line(el('div', {}, el('span', { className: 'cmd' }), el('span', { className: 'cursor' }))));
+  $('plateBody').replaceChildren(...kids);
+}
+
+/* ---------- cards ---------- */
+async function toggleList(list, s) {
+  try {
+    const r = await post('/api/lists/toggle', { list, source: s.source, skillId: s.skillId, name: s.name, installs: s.installs || 0 });
+    state.lists = r.lists;
+    toast(r.on ? 'Adicionada às favoritas' : 'Removida das favoritas');
+    updateProfileCounts(); refreshView(); syncDrawer();
+  } catch (e) { toast(e.message, true); }
+}
+
+function cardEl(s, ctx, index) {
+  const main = el('button', { className: 'card-main', type: 'button' },
+    el('span', { className: 'name', textContent: s.name }),
+    el('span', { className: 'src', textContent: s.source || 'instalada manualmente' }));
+  if (s.description) {
+    const d2 = el('span', { className: 'desc2', textContent: s.description });
+    d2.dataset.orig = s.description;
+    main.append(d2);
+  }
+  const foot = el('span', { className: 'foot' });
+  if (s.installs) {
+    foot.append(el('span', { className: 'bar' }, Object.assign(el('i'), { style: `width:${Math.max(4, Math.round(s.installs / (s.max || s.installs) * 100))}%` })));
+    if (s.change > 0) foot.append(el('span', { className: 'hotup', textContent: `▲ ${fmt(s.change)} hoje` }));
+    foot.append(el('span', { textContent: fmt(s.installs) }));
+  }
+  if (s.isNew) foot.append(el('span', { className: 'tag new', textContent: 'Nova' }));
+  if (ctx === 'installed' && s.installedAt) foot.append(el('span', { textContent: `instalada ${ago(s.installedAt)}` }));
+  if (ctx !== 'installed' && isInst(s)) foot.append(el('span', { className: 'tag', textContent: 'Instalada' }));
+  main.append(foot);
+
+  const actions = el('div', { className: 'card-actions' });
+  if (ctx === 'installed') {
+    const del = svgBtn('icon-btn danger', `Desinstalar ${s.name}`, ICON.trash, '<span>Confirmar?</span>');
+    let timer;
+    del.onclick = async () => {
+      if (!del.classList.contains('confirm')) {
+        del.classList.add('confirm'); clearTimeout(timer);
+        timer = setTimeout(() => del.classList.remove('confirm'), 3000);
+        return;
+      }
+      del.disabled = true;
+      try {
+        const r = await post('/api/uninstall', { skillId: s.skillId });
+        toast(`${s.name} desinstalada`);
+        await loadInstalled(); refreshView(); syncDrawer();
+      } catch (e) { del.disabled = false; toast(e.message, true); }
+    };
+    actions.append(del);
+  }
+  if (s.source) {
+    const fav = svgBtn('icon-btn', isFav(s) ? 'Tirar das favoritas' : 'Favoritar', ICON.heart);
+    fav.setAttribute('aria-pressed', String(isFav(s)));
+    fav.onclick = () => toggleList('favorites', s);
+    actions.append(fav);
+  }
+  const card = el('article', { className: 'card' + (actions.children.length > 1 ? ' two' : '') }, main, actions);
+  card.style.animationDelay = `${Math.min(index, 20) * 22}ms`;
+  main.onclick = () => openSkill(s);
+  return card;
+}
+
+function fillGrid(grid, items, ctx) {
+  const max = Math.max(...items.map(s => s.installs || 0), 1);
+  grid.replaceChildren(...items.map((s, i) => cardEl({ ...s, max }, ctx, i)));
+  translateCards(grid);
+}
+
+/* ---------- catálogo ---------- */
+async function loadCategories() {
+  const cats = await api('/api/categories');
+  $('nav').replaceChildren(...cats.map(c => {
+    const b = el('button', { className: 'tab', type: 'button', textContent: c.label });
+    b.dataset.id = c.id;
+    b.onclick = () => { state.query = ''; $('q').value = ''; selectCategory(c.id, c.label); };
+    return b;
+  }));
+  markNav(); fadeTabs(); renderStamp();
+}
+// O esmaecido só aparece quando as abas realmente passam da largura da tela.
+function fadeTabs() {
+  document.querySelectorAll('.tabs').forEach(n => n.parentElement.classList.toggle('scroll', n.scrollWidth > n.clientWidth + 1));
+}
+addEventListener('resize', fadeTabs);
+function markNav() {
+  document.querySelectorAll('#nav .tab').forEach(b => b.setAttribute('aria-current', String(!state.query && b.dataset.id === state.category)));
+}
+function selectCategory(id, label) {
+  state.category = id; state.label = label; markNav();
+  $('title').textContent = label;
+  load(`/api/skills?category=${encodeURIComponent(id)}`);
+}
+async function load(url) {
+  const grid = $('grid');
+  $('count').textContent = '';
+  grid.replaceChildren(...Array.from({ length: 12 }, () => el('div', { className: 'skeleton' })));
+  try {
+    state.items = await api(url);
+    render();
+  } catch (e) {
+    const retry = el('button', { className: 'btn small', type: 'button', textContent: 'Tentar de novo' });
+    retry.onclick = () => load(url);
+    grid.replaceChildren(el('div', { className: 'state' },
+      el('p', { textContent: 'Não consegui carregar as skills. Verifique a internet e tente de novo.' }), retry));
+  }
+}
+function render() {
+  const grid = $('grid');
+  $('count').textContent = state.items.length ? `${state.items.length} skills` : '';
+  if (!state.items.length) {
+    const none = !state.query && state.category === 'novidades' ? 'Nenhuma skill nova ainda. Toque em Atualizar para procurar.' : `Nada encontrado${state.query ? ` para "${state.query}"` : ''}. Tente outro termo ou escolha uma categoria.`;
+    grid.replaceChildren(el('div', { className: 'state', textContent: none }));
+    return;
+  }
+  fillGrid(grid, state.items, 'catalog');
+}
+
+/* ---------- atualizar e procurar novidades ---------- */
+function renderStamp() {
+  $('stamp').textContent = state.refreshedAt ? `atualizado ${ago(state.refreshedAt)}` : '';
+  const tab = document.querySelector('#nav .tab[data-id="novidades"]');
+  if (!tab) return;
+  tab.querySelector('small')?.remove();
+  if (state.newCount > 0) tab.append(el('small', { className: 'pill', textContent: String(state.newCount) }));
+  fadeTabs();
+}
+async function loadStatus() {
+  try {
+    const s = await api('/api/status');
+    state.newCount = s.newCount; state.refreshedAt = s.refreshedAt;
+  } catch {}
+  renderStamp();
+}
+$('refresh').onclick = async () => {
+  const btn = $('refresh');
+  btn.disabled = true; btn.classList.add('busy'); $('refreshLabel').textContent = 'Procurando…';
+  try {
+    const r = await post('/api/refresh');
+    await loadStatus();
+    if (state.query) load(`/api/skills?q=${encodeURIComponent(state.query)}`); else selectCategory(state.category, state.label);
+    toast(r.firstRun ? 'Catálogo atualizado. Daqui para a frente aviso o que for novo.'
+      : r.newCount > 0 ? `${r.newCount} ${r.newCount === 1 ? 'skill nova encontrada' : 'skills novas encontradas'}. Veja em Novidades.`
+      : 'Catálogo atualizado. Nada novo desde a última vez.');
+  } catch (e) { toast(e.message, true); }
+  btn.disabled = false; btn.classList.remove('busy'); $('refreshLabel').textContent = 'Atualizar';
+};
+
+/* ---------- perfil ---------- */
+const PTABS = [
+  { id: 'instaladas', label: 'Instaladas', hash: '' },
+  { id: 'favoritas', label: 'Favoritas', hash: '/favoritas' },
+];
+const pCount = id => id === 'instaladas' ? state.installed.length : state.lists.favorites.length;
+
+function updateProfileCounts() {
+  document.querySelectorAll('#pTabs .tab').forEach(b => { b.querySelector('small').textContent = pCount(b.dataset.id); });
+}
+
+function renderProfileHeadStatic() {
+  const u = state.me.user;
+  const avatar = u && okAvatar(u.avatar) ? el('img', { className: 'avatar', src: u.avatar, alt: '' })
+    : el('div', { className: 'avatar ph', textContent: u ? (u.name || u.login || '?')[0].toUpperCase() : '?' });
+  const who = el('div', { className: 'who' });
+  const actions = el('div', { className: 'row-actions' });
+  const btn = (text, cls, fn) => { const b = el('button', { className: 'btn small ' + cls, type: 'button', textContent: text }); b.onclick = fn; return b; };
+  if (u) {
+    who.append(el('h2', { textContent: u.name || u.login }), el('p', { textContent: u.login ? '@' + u.login : 'perfil local' }),
+      el('p', { className: 'muted', textContent: 'Guardado só neste navegador, junto com as suas favoritas.' }));
+    actions.append(btn('Editar perfil', '', openProfileEditor), btn('Remover perfil', 'quiet', () => { try { localStorage.removeItem('catalogo.profile'); } catch {} loadMe().then(renderProfile); toast('Perfil removido. Suas favoritas continuam aqui.'); }));
+  } else {
+    who.append(el('h2', { textContent: 'Seu perfil' }),
+      el('p', { className: 'muted', textContent: 'Crie um perfil com nome e foto. Ele fica só neste navegador, junto com as suas favoritas. Não precisa de conta nem de login.' }));
+    actions.append(btn('Criar perfil', '', openProfileEditor));
+  }
+  $('pHead').replaceChildren(avatar, who, actions);
+}
+
+function renderProfileHead() {
+  if (STATIC) return renderProfileHeadStatic();
+  const u = state.me.user;
+  const avatar = u && u.avatar ? el('img', { className: 'avatar', src: u.avatar, alt: '' })
+    : el('div', { className: 'avatar ph', textContent: u ? u.login[0].toUpperCase() : '?' });
+  const who = el('div', { className: 'who' });
+  const actions = el('div');
+  if (u) {
+    who.append(el('h2', { textContent: u.name }), el('p', { textContent: '@' + u.login }));
+    const out = el('button', { className: 'btn small quiet', type: 'button', textContent: 'Sair' });
+    out.onclick = async () => {
+      await post('/api/auth/logout');
+      await loadMe(); await loadLists(); renderProfile();
+      toast('Você saiu. As listas voltaram a ser deste computador.');
+    };
+    actions.append(out);
+  } else {
+    who.append(el('h2', { textContent: 'Seu perfil' }),
+      el('p', { className: 'muted', textContent: 'Entre com o GitHub para ligar suas listas à sua conta. Sem login, tudo fica salvo só neste computador.' }));
+    const inn = el('button', { className: 'btn small', type: 'button', textContent: 'Entrar com GitHub' });
+    inn.onclick = openLogin;
+    actions.append(inn);
+  }
+  $('pHead').replaceChildren(avatar, who, actions);
+}
+
+function renderProfile() {
+  renderProfileHead();
+  $('pTabs').replaceChildren(...PTABS.map(t => {
+    const b = el('button', { className: 'tab', type: 'button' }, t.label, el('small', { textContent: pCount(t.id) }));
+    b.dataset.id = t.id;
+    b.setAttribute('aria-current', String(t.id === state.ptab));
+    b.onclick = () => { location.hash = '#perfil' + t.hash; };
+    return b;
+  }));
+  const grid = $('pGrid'), tab = PTABS.find(t => t.id === state.ptab);
+  $('pTitle').textContent = tab.label;
+  $('pActions').replaceChildren(...(state.ptab === 'favoritas' ? favoriteTools() : []));
+  if (STATIC && state.ptab === 'instaladas' && !(state.fs && state.fs.granted)) {
+    $('pCount').textContent = ''; $('pNote').textContent = '';
+    grid.replaceChildren(folderNeededBox());
+    return;
+  }
+  const installedItems = () => state.installed.map(i => ({ skillId: i.skillId, source: i.source, name: i.skillId, description: i.description, installedAt: i.installedAt }));
+  const all = state.ptab === 'instaladas' ? installedItems() : state.lists.favorites;
+  const q = state.pq.trim().toLowerCase();
+  const match = s => `${s.name} ${s.skillId} ${s.source || ''} ${s.description || ''}`.toLowerCase().includes(q);
+  const items = q ? all.filter(match) : all;
+  $('pCount').textContent = q ? `${items.length} de ${all.length}` : items.length ? `${items.length} ${items.length === 1 ? 'skill' : 'skills'}` : '';
+  $('pNote').textContent = state.ptab === 'instaladas' && items.length
+    ? 'Desinstalar apaga a pasta da skill. Para ter de volta, instale de novo pelo catálogo.' : '';
+  if (!items.length && q) {
+    const other = state.ptab === 'instaladas' ? { id: 'favoritas', label: 'Favoritas', list: state.lists.favorites } : { id: 'instaladas', label: 'Instaladas', list: installedItems() };
+    const n = other.list.filter(match).length;
+    const kids = [el('p', { textContent: `Nenhuma skill de ${tab.label.toLowerCase()} combina com "${state.pq.trim()}".` })];
+    if (n) {
+      const go = el('button', { className: 'btn small', type: 'button', textContent: `Ver ${n} em ${other.label}` });
+      go.onclick = () => { location.hash = '#perfil' + (other.id === 'favoritas' ? '/favoritas' : ''); };
+      kids.push(go);
+    }
+    grid.replaceChildren(el('div', { className: 'state' }, ...kids));
+    return;
+  }
+  if (!items.length) {
+    const msg = {
+      instaladas: 'Nenhuma skill instalada ainda. Escolha uma no catálogo.',
+      favoritas: 'Você ainda não favoritou nenhuma skill. Toque no coração de um card para guardá-la aqui e instalar depois.',
+    }[state.ptab];
+    const go = el('button', { className: 'btn small', type: 'button', textContent: 'Ir para o catálogo' });
+    go.onclick = () => { location.hash = ''; };
+    grid.replaceChildren(el('div', { className: 'state' }, el('p', { textContent: msg }), go));
+    return;
+  }
+  fillGrid(grid, items, state.ptab === 'instaladas' ? 'installed' : 'list');
+}
+
+/* ---------- rotas ---------- */
+function route() {
+  const h = location.hash;
+  const view = h.startsWith('#perfil') ? 'profile' : h.startsWith('#colecao=') ? 'collection' : 'catalog';
+  const was = state.view;
+  state.view = view;
+  if (was !== view && (was === 'profile' || view === 'profile')) {
+    $('q').value = view === 'profile' ? state.pq : state.query;
+    $('q').placeholder = view === 'profile' ? 'buscar nas suas instaladas e favoritas…' : 'buscar: react, pdf, testes…';
+  }
+  $('viewCatalog').hidden = view !== 'catalog';
+  $('viewProfile').hidden = view !== 'profile';
+  $('viewCollection').hidden = view !== 'collection';
+  renderMeBtn();
+  if (view === 'profile') {
+    state.ptab = h.includes('/favoritas') ? 'favoritas' : 'instaladas';
+    renderProfile();
+  } else if (view === 'collection') {
+    renderCollection();
+  } else if (state.items.length) {
+    render();
+  }
+  scrollTo({ top: 0, behavior: 'instant' });
+}
+addEventListener('hashchange', route);
+$('brand').onclick = () => { if (location.hash) location.hash = ''; else scrollTo({ top: 0, behavior: 'smooth' }); };
+$('meBtn').onclick = () => { location.hash = '#perfil'; };
+
+/* ---------- painel de detalhe ---------- */
+const logBox = () => $('dLog');
+function logReset() { logBox().className = 'log'; logBox().replaceChildren(); }
+function logLine(text, cls = '') {
+  logBox().classList.add('show');
+  const n = el('div', { className: cls, textContent: text });
+  logBox().append(n);
+  return n;
+}
+
+/* ---------- repositório e autor da skill ---------- */
+const ago = iso => {
+  const rtf = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
+  const mins = Math.round((Date.now() - new Date(iso)) / 6e4);
+  if (mins < 1) return 'agora mesmo';
+  if (mins < 60) return rtf.format(-mins, 'minute');
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return rtf.format(-hrs, 'hour');
+  const days = Math.round(hrs / 24);
+  return days < 30 ? rtf.format(-days, 'day') : days < 365 ? rtf.format(-Math.round(days / 30), 'month') : rtf.format(-Math.round(days / 365), 'year');
+};
+function setRepoLinks(s, skillUrl) {
+  const [owner] = s.source.split('/');
+  const link = (href, text) => el('a', { href, target: '_blank', rel: 'noopener', textContent: text });
+  $('dLinks').replaceChildren(
+    link(`https://github.com/${s.source}`, 'Ver repositório ↗'),
+    link(`https://github.com/${owner}`, `Perfil de @${owner} ↗`),
+    ...(skillUrl ? [link(skillUrl, 'Ver SKILL.md ↗')] : []));
+}
+async function showRepo(s) {
+  const box = $('dRepoBox');
+  box.hidden = !s.source;
+  if (!s.source) return;
+  const [owner] = s.source.split('/');
+  Object.assign($('dRepo'), { href: `https://github.com/${s.source}` });
+  $('dAvatar').src = `https://github.com/${owner}.png?size=88`;
+  $('dRepoName').textContent = s.source;
+  $('dRepoStats').textContent = 'Carregando dados do repositório…';
+  setRepoLinks(s);
+  try {
+    const r = await api(`/api/repo?source=${encodeURIComponent(s.source)}`);
+    if (state.current !== s) return;
+    const st = r.stats;
+    $('dRepoStats').textContent = st
+      ? [`★ ${fmt(st.stars)}`, st.language, st.license, st.archived ? 'arquivado' : (st.pushedAt ? `atualizado ${ago(st.pushedAt)}` : null)].filter(Boolean).join(' · ')
+      : 'Dados do repositório indisponíveis agora';
+  } catch { if (state.current === s) $('dRepoStats').textContent = 'Dados do repositório indisponíveis agora'; }
+}
+
+function syncDrawer() {
+  const s = state.current;
+  if (!s || !$('dlg').open) return;
+  const fav = isFav(s);
+  $('dFav').setAttribute('aria-pressed', String(fav));
+  $('dFav').innerHTML = ICON.heart + (fav ? 'Favorita' : 'Favoritar');
+  setAction(s);
+  const note = $('dNote');
+  note.hidden = true;
+  if (STATIC && s.source && !isInst(s) && window.CAT) {
+    const text = !window.CAT.supported
+      ? 'Este navegador não grava na sua pasta. O botão copia um pedido para colar no Claude Code, que instala por você. No Chrome ou no Edge a instalação é com um clique.'
+      : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta .claude do seu computador. É uma vez só.' : '';
+    if (text) { note.textContent = text; note.hidden = false; }
+  }
+}
+
+async function openSkill(s) {
+  state.current = s;
+  const local = !s.source;
+  $('dName').textContent = s.name;
+  showRepo(s);
+  state.descOrig = null; $('dTr').hidden = true;
+  $('dDesc').className = 'desc loading'; $('dDesc').textContent = 'Carregando descrição…';
+  $('dInstallsRow').hidden = !s.installs;
+  if (s.installs) $('dInstalls').textContent = s.installs.toLocaleString('pt-BR');
+  $('dDest').textContent = `${state.dir}/${s.skillId}`;
+  $('dFav').hidden = local;
+  $('dPreview').hidden = true; $('dPreview').open = false;
+  logReset();
+  $('dStar').hidden = true;
+  $('dlg').showModal();
+  syncDrawer();
+  try {
+    const d = local
+      ? await api(`/api/local-skill?skillId=${encodeURIComponent(s.skillId)}`)
+      : await api(`/api/skill?source=${encodeURIComponent(s.source)}&skillId=${encodeURIComponent(s.skillId)}`);
+    if (state.current !== s) return;
+    state.descOrig = d.description; showDescription(s);
+    $('dContent').textContent = d.content; $('dPreview').hidden = false;
+    $('dPreview').querySelector('summary').textContent = isInst(s) ? 'Ler o SKILL.md' : 'Ler o SKILL.md antes de instalar';
+    if (!local) setRepoLinks(s, d.githubUrl);
+  } catch (e) {
+    if (state.current === s) { $('dDesc').className = 'desc'; $('dDesc').textContent = e.message; }
+  }
+}
+
+function setAction(s, busy) {
+  const b = $('dAction'), inst = isInst(s);
+  const copyMode = STATIC && window.CAT && !window.CAT.supported && !inst;
+  b.hidden = !s.source && !inst;
+  b.disabled = !!busy;
+  b.className = 'btn' + (inst ? ' ghost' : '');
+  b.textContent = busy ? (inst ? 'Removendo…' : 'Instalando…') : (inst ? 'Desinstalar' : copyMode ? 'Copiar pedido para o Claude' : 'Instalar');
+}
+
+const claudeRequest = s => `Instale a skill "${s.skillId}" do repositório https://github.com/${s.source} na minha pasta global de skills (~/.claude/skills/${s.skillId}). Faça um clone raso, copie só a pasta dessa skill, leia o SKILL.md e me avise se houver algo suspeito antes de eu usar.`;
+
+function showStarCta() {
+  if (lsGet('catalogo.starClicked', false)) return;
+  const shown = lsGet('catalogo.starShown', 0);
+  if (shown >= 5) return; // pede com moderação
+  lsSet('catalogo.starShown', shown + 1);
+  $('dStar').hidden = false;
+}
+
+let confirmTimer;
+$('dAction').onclick = async () => {
+  const s = state.current; if (!s) return;
+  const removing = isInst(s);
+  if (!removing && STATIC && window.CAT && !window.CAT.supported) { // navegador sem acesso à pasta: o Claude instala
+    const text = claudeRequest(s);
+    logReset();
+    try { await navigator.clipboard.writeText(text); logLine('✓ pedido copiado', 'ok'); toast('Pedido copiado. Cole no Claude Code.'); }
+    catch { logLine('Não consegui copiar sozinho. Copie o texto abaixo:'); }
+    logLine(text);
+    logLine('Cole no Claude Code: ele baixa a skill para a sua pasta e confere o conteúdo antes de você usar.');
+    return;
+  }
+  if (removing && !$('dAction').dataset.sure) { // apagar é definitivo: pede um segundo clique
+    const b = $('dAction');
+    b.dataset.sure = '1'; b.textContent = 'Clique de novo para apagar';
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => { delete b.dataset.sure; setAction(s); }, 3000);
+    return;
+  }
+  clearTimeout(confirmTimer); delete $('dAction').dataset.sure;
+  setAction(s, true); logReset();
+  const dest = `${state.dir}/${s.skillId}`;
+  const working = logLine(removing ? `rm -r ${dest}` : STATIC ? `instalando de github.com/${s.source}` : `git clone --depth 1 github.com/${s.source}`, 'cmd spin');
+  try {
+    const r = await post(removing ? '/api/uninstall' : '/api/install', { source: s.source, skillId: s.skillId });
+    working.classList.remove('spin');
+    if (removing) {
+      logLine(`✓ ${s.skillId} desinstalada`, 'ok');
+      logLine(r.removed === 'atalho' ? 'Só o atalho foi removido; o original continua onde estava.' : 'Pasta apagada.');
+    } else {
+      logLine(STATIC ? `✓ gravada em ${dest}` : `✓ copiada para ${dest}`, 'ok');
+      logLine('Já deve estar disponível no Claude Code. Se não aparecer, reinicie-o.');
+      showStarCta();
+    }
+    toast(removing ? `${s.name} desinstalada` : `${s.name} instalada`);
+    await loadInstalled(); refreshView(); syncDrawer();
+  } catch (e) {
+    working.classList.remove('spin');
+    logLine(`✗ ${e.message}`, 'bad');
+  }
+  setAction(s);
+};
+$('dFav').onclick = () => state.current && toggleList('favorites', state.current);
+$('close').onclick = () => $('dlg').close();
+$('dlg').addEventListener('click', e => { if (e.target === $('dlg')) $('dlg').close(); });
+
+/* ---------- site público: pasta de skills, perfil local, coleções e estrelas ---------- */
+function claudeDirHint() {
+  const ua = navigator.userAgent;
+  if (/Windows/i.test(ua)) return { path: '%USERPROFILE%\\.claude', tip: 'No Windows, cole esse caminho no campo "Nome da pasta" do seletor. (A pasta fica em C:\\Users\\SEU-NOME\\.claude.)' };
+  if (/Mac/i.test(ua)) return { path: '~/.claude', tip: 'No Mac, aperte Cmd+Shift+G no seletor, cole esse caminho e confirme. (Cmd+Shift+. mostra as pastas ocultas.)' };
+  return { path: '~/.claude', tip: 'No Linux, aperte Ctrl+L no seletor e cole esse caminho. (Ctrl+H mostra as pastas ocultas.)' };
+}
+
+function renderFolderDialog(onPick, error) {
+  const hint = claudeDirHint();
+  const copy = el('button', { className: 'linkbtn', type: 'button', textContent: 'copiar caminho' });
+  copy.onclick = () => navigator.clipboard?.writeText(hint.path).then(() => toast('Caminho copiado'), () => {});
+  const pick = el('button', { className: 'btn', type: 'button', textContent: 'Escolher pasta' });
+  pick.onclick = onPick;
+  const ol = el('ol', { className: 'steps' },
+    el('li', {}, 'Clique em ', el('b', { textContent: 'Escolher pasta' }), '.'),
+    el('li', {}, 'Vá até a pasta ', el('code', { textContent: hint.path }), ' ', copy, el('br'), hint.tip),
+    el('li', {}, 'Selecione a ', el('b', { textContent: '.claude' }), ' (ou a ', el('b', { textContent: 'skills' }), ', se já existir) e confirme em ', el('b', { textContent: 'Permitir' }), '.'));
+  $('fdBody').replaceChildren(
+    el('p', { className: 'desc', textContent: 'Para instalar com um clique, o navegador precisa de permissão para gravar na pasta de skills do Claude Code. Você faz isso só uma vez.' }),
+    ol, ...(error ? [el('p', { className: 'err', textContent: error })] : []), pick,
+    el('p', { className: 'note flat', textContent: 'O site só mexe nessa pasta e nada sai do seu computador. Você pode retirar a permissão quando quiser, nas configurações do navegador.' }));
+}
+
+// Chamado pela camada de dados quando falta a pasta: abre a janela e devolve a pasta escolhida.
+window.CATUI = {
+  askFolder() {
+    return new Promise((resolve, reject) => {
+      const dlg = $('folderDlg');
+      let done = false;
+      const finish = (fn, v) => { if (!done) { done = true; fn(v); } };
+      const pick = async () => {
+        try { const h = await window.CAT.connect(); dlg.close(); finish(resolve, h); }
+        catch (e) { if (e.name !== 'AbortError') renderFolderDialog(pick, e.message); }
+      };
+      renderFolderDialog(pick);
+      dlg.addEventListener('close', () => finish(reject, Object.assign(new Error('Instalação cancelada: nenhuma pasta foi escolhida.'), { name: 'AbortError' })), { once: true });
+      dlg.showModal();
+    });
+  },
+};
+$('fdClose').onclick = () => $('folderDlg').close();
+$('folderDlg').addEventListener('click', e => { if (e.target === $('folderDlg')) $('folderDlg').close(); });
+
+async function connectFolderUI() {
+  try {
+    await window.CAT.folder({ ask: true });
+    await loadInstalled(); refreshView();
+    toast('Pasta conectada');
+  } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
+}
+
+function folderNeededBox() {
+  const can = state.fs && state.fs.supported;
+  const kids = [el('p', { textContent: can
+    ? 'Conecte a pasta de skills para ver aqui o que você já instalou.'
+    : 'Este navegador não consegue ler a sua pasta de skills. Use o Chrome ou o Edge para ver e gerenciar o que está instalado.' })];
+  if (can) {
+    const b = el('button', { className: 'btn small', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
+    b.onclick = connectFolderUI;
+    kids.push(b);
+  }
+  return el('div', { className: 'state' }, ...kids);
+}
+
+/* ----- perfil local (nome e foto guardados no navegador) ----- */
+function openProfileEditor() {
+  const cur = state.me.user || {};
+  const draft = { avatar: okAvatar(cur.avatar) ? cur.avatar : '' };
+  const dlg = $('profileDlg');
+  const holder = el('div');
+  const drawAvatar = () => {
+    const initial = (nameInput.value || loginInput.value || '?').trim()[0].toUpperCase();
+    holder.replaceChildren(draft.avatar ? el('img', { className: 'pf-avatar', src: draft.avatar, alt: '' }) : el('div', { className: 'pf-avatar', textContent: initial }));
+  };
+  const nameInput = el('input', { className: 'field', value: cur.name || '', maxLength: 60, placeholder: 'Como você quer ser chamado', autocomplete: 'off' });
+  const loginInput = el('input', { className: 'field', value: cur.login || '', placeholder: 'seu-usuario (opcional)', autocomplete: 'off', spellcheck: false });
+  nameInput.setAttribute('aria-label', 'Nome'); loginInput.setAttribute('aria-label', 'Usuário do GitHub');
+  const errBox = el('p', { className: 'err', hidden: true });
+  const setErr = m => { errBox.textContent = m || ''; errBox.hidden = !m; };
+
+  const lookup = async () => {
+    const login = loginInput.value.trim().replace(/^@/, '');
+    if (!/^[A-Za-z0-9-]{1,39}$/.test(login)) { setErr('Digite um usuário do GitHub válido (letras, números e hífen).'); return false; }
+    setErr('');
+    try {
+      const res = await fetch(`https://api.github.com/users/${login}`);
+      if (res.status === 404) throw new Error('Não encontrei esse usuário no GitHub.');
+      if (res.status === 403) throw new Error('O GitHub limitou as consultas por agora. Tente de novo mais tarde.');
+      const d = await res.json();
+      draft.avatar = okAvatar(d.avatar_url) ? d.avatar_url : '';
+      loginInput.value = d.login;
+      if (!nameInput.value.trim()) nameInput.value = d.name || d.login;
+      drawAvatar();
+      return true;
+    } catch (e) { setErr(e.message); return false; }
+  };
+  const lookupBtn = el('button', { className: 'btn quiet', type: 'button', textContent: 'Buscar foto' });
+  lookupBtn.onclick = async () => { lookupBtn.disabled = true; await lookup(); lookupBtn.disabled = false; };
+
+  const file = el('input', { type: 'file', accept: 'image/*', hidden: true });
+  const upload = el('button', { className: 'linkbtn', type: 'button', textContent: 'ou enviar uma foto do computador' });
+  upload.onclick = () => file.click();
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    if (!f.type.startsWith('image/')) { setErr('Escolha um arquivo de imagem.'); return; }
+    try {
+      const bmp = await createImageBitmap(f);
+      const size = 160, c = document.createElement('canvas');
+      c.width = c.height = size;
+      const side = Math.min(bmp.width, bmp.height);
+      c.getContext('2d').drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, size, size);
+      draft.avatar = c.toDataURL('image/jpeg', 0.85); setErr(''); drawAvatar();
+    } catch { setErr('Não consegui ler essa imagem.'); }
+  };
+
+  const save = el('button', { className: 'btn', type: 'button', textContent: 'Salvar perfil' });
+  save.onclick = async () => {
+    const name = nameInput.value.trim().slice(0, 60);
+    const login = loginInput.value.trim().replace(/^@/, '');
+    if (!name && !login) { setErr('Escreva um nome ou um usuário do GitHub.'); return; }
+    if (login && !/^[A-Za-z0-9-]{1,39}$/.test(login)) { setErr('Usuário do GitHub inválido (letras, números e hífen).'); return; }
+    if (login && !draft.avatar) await lookup(); // tenta pegar a foto pública
+    lsSet('catalogo.profile', { name: name || login, login, avatar: draft.avatar });
+    await loadMe();
+    if (state.view === 'profile') renderProfile();
+    dlg.close();
+    toast('Perfil salvo neste navegador');
+  };
+
+  $('pfBody').replaceChildren(
+    el('div', { className: 'pf-row' }, holder, el('div', { className: 'pf-field' }, el('label', { className: 'pf-label', textContent: 'Nome' }), nameInput)),
+    el('div', {}, el('label', { className: 'pf-label', textContent: 'Usuário do GitHub (a foto vem de lá)' }), el('div', { className: 'pf-line' }, loginInput, lookupBtn)),
+    upload, file, errBox, save,
+    el('p', { className: 'note flat', textContent: 'Nada disso sai do seu navegador. Não é um login: qualquer um pode digitar qualquer nome.' }));
+  drawAvatar();
+  nameInput.addEventListener('input', () => { if (!draft.avatar) drawAvatar(); });
+  dlg.showModal();
+  nameInput.focus();
+}
+$('pfClose').onclick = () => $('profileDlg').close();
+$('profileDlg').addEventListener('click', e => { if (e.target === $('profileDlg')) $('profileDlg').close(); });
+
+/* ----- favoritas: exportar, importar e compartilhar por link ----- */
+const IDRE = /^[A-Za-z0-9][A-Za-z0-9_.-]*\/(?!\.+$)[A-Za-z0-9_.-]+\/[A-Za-z0-9][A-Za-z0-9_.-]*$/;
+const toB64u = text => {
+  const bytes = new TextEncoder().encode(text);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+const fromB64u = s => {
+  const b = s.replace(/-/g, '+').replace(/_/g, '/');
+  return new TextDecoder().decode(Uint8Array.from(atob(b + '='.repeat((4 - b.length % 4) % 4)), c => c.charCodeAt(0)));
+};
+
+function shareUrl() {
+  const u = state.me.user || {};
+  const payload = { n: (u.name || '').slice(0, 60), u: u.login || '', s: state.lists.favorites.slice(0, 300).map(f => `${f.source}/${f.skillId}`) };
+  return `${CFG.siteUrl || location.origin + location.pathname}#colecao=${toB64u(JSON.stringify(payload))}`;
+}
+
+function favoriteTools() {
+  const has = state.lists.favorites.length > 0;
+  const btn = (text, fn, disabled) => { const b = el('button', { className: 'btn small quiet', type: 'button', textContent: text, disabled: !!disabled }); b.onclick = fn; return b; };
+  const file = el('input', { type: 'file', accept: 'application/json,.json', hidden: true });
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const r = await post('/api/lists/import', { favorites: Array.isArray(data) ? data : data.favorites });
+      state.lists = r.lists; updateProfileCounts(); refreshView();
+      toast(r.added ? `${r.added} ${r.added === 1 ? 'skill adicionada' : 'skills adicionadas'} às favoritas` : 'Nada novo para adicionar');
+    } catch (e) { toast(e.message || 'Arquivo inválido', true); }
+  };
+  return [
+    btn('Copiar link da lista', async () => {
+      try { await navigator.clipboard.writeText(shareUrl()); toast('Link copiado. Quem abrir vê a sua coleção.'); }
+      catch { toast('Não consegui copiar o link.', true); }
+    }, !has),
+    btn('Exportar', () => {
+      const data = JSON.stringify({ v: 1, exportedAt: new Date().toISOString(), favorites: state.lists.favorites }, null, 2);
+      const a = el('a', { href: URL.createObjectURL(new Blob([data], { type: 'application/json' })), download: 'favoritas-catalogo-de-skills.json' });
+      a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    }, !has),
+    btn('Importar', () => file.click()), file,
+  ];
+}
+
+async function renderCollection() {
+  const goCatalog = el('button', { className: 'btn small quiet', type: 'button', textContent: 'Ir para o catálogo' });
+  goCatalog.onclick = () => { location.hash = ''; };
+  let data = null;
+  try {
+    const d = JSON.parse(fromB64u(location.hash.slice('#colecao='.length)));
+    const ids = Array.isArray(d.s) ? d.s.slice(0, 300).filter(x => typeof x === 'string' && IDRE.test(x)) : [];
+    if (ids.length) data = { name: String(d.n || '').slice(0, 60), login: /^[A-Za-z0-9-]{1,39}$/.test(d.u || '') ? d.u : '', ids };
+  } catch {}
+  if (!data) {
+    $('cTitle').textContent = 'Coleção inválida';
+    $('cSub').textContent = 'O link parece incompleto ou foi alterado.';
+    $('cActions').replaceChildren(goCatalog);
+    $('cGrid').replaceChildren();
+    return;
+  }
+  const items = data.ids.map(id => { const i = id.lastIndexOf('/'); return { source: id.slice(0, i), skillId: id.slice(i + 1), name: id.slice(i + 1), installs: 0 }; });
+  $('cTitle').textContent = data.name ? `Coleção de ${data.name}` : 'Coleção compartilhada';
+  const sub = $('cSub');
+  sub.replaceChildren(`${items.length} ${items.length === 1 ? 'skill' : 'skills'} reunidas por link`);
+  if (data.login) sub.append(' · ', el('a', { href: `https://github.com/${data.login}`, target: '_blank', rel: 'noopener', textContent: `@${data.login}` }));
+  const saveAll = el('button', { className: 'btn small', type: 'button', textContent: 'Salvar todas nas minhas favoritas' });
+  saveAll.onclick = async () => {
+    try {
+      const r = await post('/api/lists/import', { favorites: items });
+      state.lists = r.lists; updateProfileCounts();
+      toast(r.added ? `${r.added} ${r.added === 1 ? 'skill salva' : 'skills salvas'} nas suas favoritas` : 'Você já tinha todas elas nas favoritas');
+    } catch (e) { toast(e.message, true); }
+  };
+  $('cActions').replaceChildren(saveAll, goCatalog);
+  fillGrid($('cGrid'), items, 'list');
+  try { // no site público, completa as instalações a partir do catálogo
+    const r = await api(`/api/lookup?ids=${encodeURIComponent(data.ids.join(','))}`);
+    if (state.view !== 'collection') return;
+    fillGrid($('cGrid'), r.skills.map((s, i) => s ? { ...items[i], installs: s.installs, change: s.change, isNew: s.isNew } : items[i]), 'list');
+  } catch { /* modo local: sem catálogo para consultar */ }
+}
+
+/* ----- contador de estrelas do repositório ----- */
+async function loadStars() {
+  const show = n => { $('starCount').textContent = fmt(n); };
+  const cached = lsGet('catalogo.stars', null);
+  if (cached) show(cached.n);
+  if (cached && Date.now() - cached.at < 36e5) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${CFG.repo}`);
+    if (!res.ok) return;
+    const d = await res.json();
+    lsSet('catalogo.stars', { at: Date.now(), n: d.stargazers_count });
+    show(d.stargazers_count);
+  } catch { /* sem contador: o botão continua funcionando */ }
+}
+$('starBtn').addEventListener('click', () => lsSet('catalogo.starClicked', true));
+$('dStar').addEventListener('click', () => { lsSet('catalogo.starClicked', true); $('dStar').hidden = true; });
+
+/* ---------- login com GitHub ---------- */
+let loginGen = 0, forceSetup = false;
+function openLogin() { forceSetup = false; $('loginDlg').showModal(); renderLogin(); }
+function closeLogin() { $('loginDlg').close(); }
+$('lClose').onclick = closeLogin;
+$('loginDlg').addEventListener('click', e => { if (e.target === $('loginDlg')) closeLogin(); });
+$('loginDlg').addEventListener('close', () => loginGen++);
+
+function renderLogin(error) {
+  const box = $('lBody');
+  loginGen++;
+  const err = () => error ? el('p', { className: 'err', textContent: error }) : '';
+  if (!state.me.configured || forceSetup) {
+    const input = el('input', { className: 'field', placeholder: 'Client ID (ex: Ov23li…)', spellcheck: false, autocomplete: 'off' });
+    input.setAttribute('aria-label', 'Client ID do OAuth App');
+    const save = el('button', { className: 'btn', type: 'button', textContent: 'Salvar e continuar' });
+    save.onclick = async () => {
+      save.disabled = true;
+      try {
+        await post('/api/auth/config', { clientId: input.value.trim() });
+        state.me.configured = true; forceSetup = false; renderLogin();
+      } catch (e) { renderLogin(e.message); }
+    };
+    const ol = el('ol', { className: 'steps' });
+    const li = (...k) => el('li', {}, ...k);
+    ol.append(
+      li(el('a', { href: 'https://github.com/settings/applications/new', target: '_blank', rel: 'noopener', textContent: 'Crie um OAuth App ↗' }), ' com qualquer nome. Em Homepage URL e Callback URL, use ', el('code', { textContent: location.origin }), '.'),
+      li('Na página do app, marque ', el('b', { textContent: 'Enable Device Flow' }), ' e clique em Update application.'),
+      li('Copie o ', el('b', { textContent: 'Client ID' }), ' e cole abaixo.'));
+    box.replaceChildren(
+      el('p', { className: 'desc', textContent: 'O login usa um OAuth App seu, criado uma única vez no GitHub. Leva cerca de um minuto:' }),
+      ol, input, err(), save,
+      el('p', { className: 'note flat', textContent: 'O Client ID é público. Nenhuma senha ou token do GitHub fica guardado neste computador.' }));
+    input.focus();
+    return;
+  }
+  const go = el('button', { className: 'btn', type: 'button', textContent: 'Entrar com GitHub' });
+  go.onclick = startLogin;
+  const change = el('button', { className: 'linkbtn', type: 'button', textContent: 'Alterar Client ID' });
+  change.onclick = () => { forceSetup = true; renderLogin(); };
+  box.replaceChildren(
+    el('p', { className: 'desc', textContent: 'Você vai autorizar o catálogo no GitHub com um código de uso único. Só lemos seu nome e foto públicos.' }),
+    err(), go, change);
+}
+
+async function startLogin() {
+  const box = $('lBody');
+  let d;
+  try { d = await post('/api/auth/start'); } catch (e) { renderLogin(e.message); return; }
+  const gen = ++loginGen;
+  const copy = el('button', { className: 'btn quiet', type: 'button', textContent: 'Copiar código' });
+  copy.onclick = () => navigator.clipboard?.writeText(d.userCode).then(() => toast('Código copiado'), () => {});
+  const open = el('a', { className: 'btn', href: d.verificationUri, target: '_blank', rel: 'noopener', textContent: 'Abrir o GitHub ↗' });
+  const status = el('p', { className: 'desc spin', textContent: 'Aguardando você autorizar no GitHub' });
+  const cancel = el('button', { className: 'linkbtn', type: 'button', textContent: 'Cancelar' });
+  cancel.onclick = () => renderLogin();
+  box.replaceChildren(
+    el('p', { className: 'desc', textContent: 'Abra o GitHub e digite este código:' }),
+    el('div', { className: 'code', textContent: d.userCode }),
+    el('div', { className: 'row' }, open, copy), status, cancel);
+
+  let wait = d.interval;
+  while (gen === loginGen) {
+    await new Promise(r => setTimeout(r, wait * 1000 + 300));
+    if (gen !== loginGen) return;
+    try {
+      const r = await post('/api/auth/poll');
+      if (gen !== loginGen) return;
+      if (r.status === 'ok') {
+        $('loginDlg').close();
+        await loadMe(); await loadLists(); refreshView();
+        toast(`Olá, ${r.user.name}!`);
+        return;
+      }
+      if (r.status === 'expired') return renderLogin('O código expirou. Gere outro e tente de novo.');
+      if (r.status === 'denied') return renderLogin('Você cancelou a autorização no GitHub.');
+      if (r.interval) wait = r.interval;
+    } catch (e) { return renderLogin(e.message); }
+  }
+}
+
+/* ---------- busca e teclado ---------- */
+$('searchForm').onsubmit = e => {
+  e.preventDefault();
+  if (state.view === 'profile') return; // no perfil a busca filtra ao digitar; não vai para o catálogo
+  if (state.view === 'collection') { history.replaceState(null, '', location.pathname + location.search); route(); }
+  const q = $('q').value.trim();
+  if (!q) { state.query = ''; selectCategory(state.category, state.label); return; }
+  state.query = q; markNav();
+  $('title').textContent = `Busca: ${q}`;
+  load(`/api/skills?q=${encodeURIComponent(q)}`);
+  $('title').scrollIntoView({ block: 'start' });
+};
+$('q').addEventListener('input', () => {
+  if (state.view !== 'profile') return;
+  state.pq = $('q').value;
+  renderProfile();
+});
+addEventListener('keydown', e => {
+  if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName) && !document.querySelector('dialog[open]')) { e.preventDefault(); $('q').focus(); }
+});
+
+/* ---------- início ---------- */
+renderMeBtn();
+$('starBtn').href = $('fRepo').href = $('dStar').href = `https://github.com/${CFG.repo}`;
+Object.assign($('fAuthor'), { href: `https://github.com/${CFG.author}`, textContent: `@${CFG.author}` });
+loadSavedTranslations();
+loadStars();
+const boot = Promise.all([loadInstalled(true), loadLists(), loadMe(), loadLangs(), loadStatus()]);
+loadCategories().then(async () => {
+  await boot;
+  if (location.hash.startsWith('#perfil') || location.hash.startsWith('#colecao=')) route();
+  selectCategory('populares', 'Populares');
+});
+</script>
+</body>
+</html>

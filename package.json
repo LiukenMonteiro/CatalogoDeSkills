@@ -1,0 +1,34 @@
+{
+  "name": "catalogo-de-skills",
+  "version": "0.1.0",
+  "description": "Catálogo local para descobrir e instalar skills no Claude Code com um clique",
+  "keywords": [
+    "claude-code",
+    "skills",
+    "agent-skills",
+    "catalog"
+  ],
+  "bin": {
+    "catalogo-de-skills": "server.js"
+  },
+  "files": [
+    "server.js",
+    "site/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node server.js",
+    "build:site": "node scripts/build-site.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiukenMonteiro/CatalogoDeSkills.git"
+  },
+  "homepage": "https://liukenmonteiro.github.io/CatalogoDeSkills/",
+  "author": "Liuken Monteiro",
+  "license": "MIT"
+}

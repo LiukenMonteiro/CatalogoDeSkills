@@ -1,0 +1,34 @@
+{
+  "categories": [
+    { "id": "populares", "label": "Populares" },
+    { "id": "em-alta", "label": "Em alta" },
+    { "id": "novidades", "label": "Novidades" },
+    { "id": "web", "label": "Web", "queries": ["react", "nextjs", "frontend", "tailwind"] },
+    { "id": "design", "label": "Design & UI", "queries": ["design", "ui", "ux", "css"] },
+    { "id": "testes", "label": "Testes", "queries": ["testing", "playwright", "e2e", "jest"] },
+    { "id": "devops", "label": "DevOps", "queries": ["docker", "deploy", "kubernetes", "ci-cd"] },
+    { "id": "documentos", "label": "Documentos", "queries": ["pdf", "docx", "pptx", "xlsx"] },
+    { "id": "codigo", "label": "Código", "queries": ["code review", "refactor", "debugging", "git"] },
+    { "id": "ia", "label": "IA & Agentes", "queries": ["agent", "mcp", "prompt", "claude api"] },
+    { "id": "dados", "label": "Dados", "queries": ["sql", "database", "data analysis", "python"] },
+    { "id": "produtividade", "label": "Produtividade", "queries": ["workflow", "automation", "planning", "writing"] },
+    { "id": "marketing", "label": "Marketing", "queries": ["seo", "marketing", "copywriting"] },
+    { "id": "seguranca", "label": "Segurança", "queries": ["security", "auth"] }
+  ],
+  "keywords": [
+    "python", "typescript", "javascript", "golang", "rust", "java", "swift", "kotlin", "php", "ruby", "csharp",
+    "django", "flask", "fastapi", "express", "nodejs", "vue", "svelte", "angular", "astro", "react native", "flutter",
+    "html", "figma", "shadcn", "accessibility", "animation", "landing page", "dashboard", "components",
+    "sales", "email", "analytics", "content", "social media", "blog",
+    "postgres", "mongodb", "supabase", "firebase", "prisma", "redis", "graphql", "api",
+    "terraform", "aws", "azure", "gcp", "vercel", "cloudflare", "github", "ci", "linux", "bash",
+    "vitest", "cypress", "pytest", "tdd", "debug", "performance", "review", "lint",
+    "oauth", "encryption", "pentest",
+    "excel", "markdown", "documentation", "translation", "research", "summarize", "notes",
+    "pandas", "machine learning", "llm", "rag", "claude", "openai", "gemini", "chatbot",
+    "slack", "notion", "linear", "jira", "stripe", "payments", "ecommerce", "shopify",
+    "mobile", "ios", "android", "game", "unity", "video", "audio", "image", "3d",
+    "blockchain", "solidity", "browser", "scraping", "cli", "plugin", "template", "starter",
+    "planning", "architecture", "product", "startup", "legal", "finance", "education", "health"
+  ]
+}

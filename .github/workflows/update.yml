@@ -1,0 +1,65 @@
+# Atualiza o catálogo (baixa as skills do skills.sh) e publica o site no GitHub Pages.
+# Antes do primeiro uso: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: Atualizar catálogo e publicar o site
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */6 * * *' # a cada 6 horas
+  workflow_dispatch:
+
+permissions:
+  contents: write # só para o commit vazio de "keepalive" (veja o último job)
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Gerar o site
+        # Em push de código, reaproveita o catálogo já publicado (rápido). Na agenda, baixa tudo de novo (~8 min).
+        run: node scripts/build-site.mjs ${{ github.event_name == 'push' && '--reuse' || '' }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  keepalive:
+    # O GitHub pausa tarefas agendadas em repositórios sem atividade há ~60 dias.
+    # Um commit vazio de tempos em tempos evita isso.
+    needs: deploy
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Manter a tarefa agendada ativa
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $(( (now - last) / 86400 )) -ge 45 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "chore: mantém a tarefa agendada ativa"
+            git push
+          fi
