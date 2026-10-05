@@ -469,6 +469,15 @@
   </div>
 </dialog>
 
+<!-- ===== guia do Brave ===== -->
+<dialog id="braveDlg" class="modal" aria-labelledby="bvTitle">
+  <div class="dlg">
+    <button class="close" id="bvClose" aria-label="Fechar">×</button>
+    <h3 id="bvTitle">Clique único no Brave</h3>
+    <div class="stack" id="bvBody"></div>
+  </div>
+</dialog>
+
 <!-- ===== perfil local (site público) ===== -->
 <dialog id="profileDlg" class="modal" aria-labelledby="pfTitle">
   <div class="dlg">
@@ -754,10 +763,14 @@ function renderPlate(animate) {
   if (STATIC && !(state.fs && state.fs.granted)) {
     $('plateCount').textContent = '—';
     const can = state.fs && state.fs.supported;
-    kids.push(line(el('p', { className: 'empty', textContent: can ? 'Conecte a pasta de skills para ver as suas instaladas aqui.' : brave.is ? `No Brave, ative a gravação em pasta em ${BRAVE_FLAG} e reinicie o navegador.` : 'Este navegador não lê a sua pasta de skills. No Chrome ou no Edge você instala com um clique.' })));
+    kids.push(line(el('p', { className: 'empty', textContent: can ? 'Conecte a pasta de skills para ver as suas instaladas aqui.' : brave.is ? 'No Brave, ligue a gravação em pasta (30 segundos, uma vez) para instalar com um clique.' : 'Este navegador não lê a sua pasta de skills. No Chrome ou no Edge você instala com um clique.' })));
     if (can) {
       const b = el('button', { className: 'plate-btn', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
       b.onclick = connectFolderUI;
+      kids.push(line(b));
+    } else if (brave.is) {
+      const b = el('button', { className: 'plate-btn', type: 'button', textContent: 'Como ligar' });
+      b.onclick = openBraveGuide;
       kids.push(line(b));
     }
   } else if (names.length) {
@@ -1115,12 +1128,12 @@ function syncDrawer() {
   if (STATIC && s.source && !isInst(s) && window.CAT) {
     const text = !window.CAT.supported
       ? (brave.is
-        ? `Sem mexer em nada, o botão acima funciona: ele abre o Claude Code com o pedido pronto e você só aperta Enter. Para o clique único, o Brave exige ligar uma opção que vem desligada: ${BRAVE_FLAG} (escolha "Enabled", reinicie o Brave e volte aqui).`
+        ? 'Sem mexer em nada, o botão acima abre o Claude Code com o pedido pronto e você só aperta Enter. Quer o clique único, como no Chrome? O Brave deixa a gravação em pasta desligada; ligar leva 30 segundos, uma vez só.'
         : 'Este navegador não grava na sua pasta. O botão acima abre o Claude Code com o pedido pronto e você só aperta Enter. No Chrome ou no Edge a instalação é com um clique.')
       : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta .claude do seu computador. É uma vez só.' : '';
     if (text) {
       note.replaceChildren(text);
-      if (!window.CAT.supported && brave.is) { const b = el('button', { className: 'linkbtn', type: 'button', textContent: ' Copiar endereço da opção' }); b.onclick = copyBraveFlag; note.append(b); }
+      if (!window.CAT.supported && brave.is) { const b = el('button', { className: 'linkbtn', type: 'button', textContent: ' Como ligar o clique único' }); b.onclick = openBraveGuide; note.append(b); }
       note.hidden = false;
     }
   }
@@ -1239,6 +1252,23 @@ const brave = { is: false };
 if (STATIC && navigator.brave && navigator.brave.isBrave) {
   navigator.brave.isBrave().then(v => { brave.is = !!v; if (v) { syncDrawer(); renderPlate(false); if (state.view === 'profile') renderProfile(); } }).catch(() => {});
 }
+function openBraveGuide() {
+  const copy = el('button', { className: 'btn small', type: 'button', textContent: 'Copiar endereço' });
+  copy.onclick = copyBraveFlag;
+  const ol = el('ol', { className: 'steps' },
+    el('li', {}, 'Copie o endereço ', el('code', { textContent: BRAVE_FLAG }), ' ', copy, el('br'), 'Abra uma ', el('b', { textContent: 'nova aba' }), ', cole na barra de endereço e aperte Enter.'),
+    el('li', {}, 'Na linha ', el('b', { textContent: 'File System Access API' }), ', troque ', el('i', { textContent: 'Default' }), ' por ', el('b', { textContent: 'Enabled' }), '.'),
+    el('li', {}, 'Clique em ', el('b', { textContent: 'Relaunch' }), ' (Reiniciar), no canto de baixo, e volte para este site.'));
+  const ok = el('button', { className: 'btn', type: 'button', textContent: 'Entendi' });
+  ok.onclick = () => $('braveDlg').close();
+  $('bvBody').replaceChildren(
+    el('p', { className: 'desc', textContent: 'O Brave deixa a gravação em pasta desligada por segurança. Nenhum site consegue ligar isso por você, porque o navegador não deixa páginas abrirem as configurações dele. Mas é rápido e só precisa ser feito uma vez:' }),
+    ol, ok,
+    el('p', { className: 'note flat', textContent: 'Depois disso, instalar aqui funciona como no Chrome: um clique. Enquanto isso, o botão "Instalar com o Claude Code" já funciona sem configurar nada.' }));
+  $('braveDlg').showModal();
+}
+$('bvClose').onclick = () => $('braveDlg').close();
+$('braveDlg').addEventListener('click', e => { if (e.target === $('braveDlg')) $('braveDlg').close(); });
 const copyBraveFlag = () => navigator.clipboard?.writeText(BRAVE_FLAG).then(() => toast('Endereço copiado. Cole na barra de endereço do Brave.'), () => toast('Digite ' + BRAVE_FLAG, true));
 
 function claudeDirHint() {
@@ -1296,8 +1326,8 @@ function folderNeededBox() {
   const can = state.fs && state.fs.supported;
   const kids = [el('p', { textContent: can
     ? 'Conecte a pasta de skills para ver aqui o que você já instalou.'
-    : brave.is ? `No Brave, a leitura da pasta vem desligada. Ative em ${BRAVE_FLAG} (escolha "Enabled" e reinicie o navegador) para ver e gerenciar o que está instalado.` : 'Este navegador não consegue ler a sua pasta de skills. Use o Chrome ou o Edge para ver e gerenciar o que está instalado.' })];
-  if (!can && brave.is) { const b = el('button', { className: 'btn small', type: 'button', textContent: 'Copiar endereço da opção' }); b.onclick = copyBraveFlag; kids.push(b); }
+    : brave.is ? 'No Brave, a leitura da pasta vem desligada. Ligue-a (30 segundos, uma vez) para ver e gerenciar o que está instalado.' : 'Este navegador não consegue ler a sua pasta de skills. Use o Chrome ou o Edge para ver e gerenciar o que está instalado.' })];
+  if (!can && brave.is) { const b = el('button', { className: 'btn small', type: 'button', textContent: 'Como ligar' }); b.onclick = openBraveGuide; kids.push(b); }
   if (can) {
     const b = el('button', { className: 'btn small', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
     b.onclick = connectFolderUI;
