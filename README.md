@@ -25,11 +25,17 @@
 
 ### No site (recomendado)
 
-1. Abra o site no **Chrome, Edge, Brave ou Opera** (computador).
+1. Abra o site no **Chrome, Edge ou Opera** (computador). No **Brave**, antes ligue a gravação em pasta (veja o quadro abaixo).
 2. Escolha uma skill e clique em **Instalar**.
 3. Na primeira vez, o site pede a pasta `.claude` do seu computador. Siga o passo a passo da janela e confirme em **Permitir**.
 
 Pronto: a skill aparece no Claude Code, normalmente sem precisar reiniciar.
+
+<details>
+<summary>Usa o Brave? Ligue a gravação em pasta (uma vez)</summary>
+
+O Brave traz esse recurso desligado por padrão. Cole `brave://flags/#file-system-access-api` na barra de endereço, mude a opção para **Enabled**, reinicie o Brave e volte ao site. O próprio site mostra esse passo a passo (com um botão para copiar o endereço) quando detecta o Brave.
+</details>
 
 Em outros navegadores (Firefox, Safari, o navegador embutido do VS Code ou do Cursor) o site não consegue gravar na sua pasta. Nesse caso o botão vira **Copiar pedido para o Claude**: você cola o pedido no Claude Code e ele baixa a skill e confere o conteúdo para você.
 
@@ -76,7 +82,7 @@ O catálogo só lê o seu nome e a sua foto públicos.
                                                               ▼
    Seu navegador  ◄────────────  GitHub Pages  (site estático, sem servidor)
         │  │  │
-        │  │  └──► api.github.com / raw.githubusercontent.com   dados do repositório e arquivos da skill
+        │  │  └──► api.github.com / raw.githubusercontent.com / jsDelivr   dados do repositório e arquivos da skill
         │  └─────► tradutor do Chrome (no seu computador) ou MyMemory   tradução das descrições
         └────────► sua pasta ~/.claude/skills   gravação direta (File System Access API)
 ```
@@ -103,7 +109,7 @@ O catálogo só lê o seu nome e a sua foto públicos.
 
 - Arquivos gravados pelo navegador **não recebem o bit de executável** (o navegador não consegue defini-lo). Skills que trazem scripts feitos para rodar direto (`./script.sh`) podem precisar de `chmod +x`; os que rodam com `python script.py` ou `bash script.sh` funcionam normalmente.
 - A busca procura no **nome, no repositório e nas palavras-chave** das skills, não no texto completo das descrições.
-- Os dados do repositório vêm da API pública do GitHub, que limita a 60 consultas por hora por computador. A tradução gratuita de reserva (MyMemory) também tem cota diária; o tradutor embutido do Chrome não tem limite.
+- Os dados do repositório (estrelas, linguagem) vêm da API pública do GitHub, que limita a 60 consultas por hora por computador. Quando o limite estoura, a descrição e a instalação continuam funcionando por uma reserva (jsDelivr); só as estrelas somem por alguns minutos. A tradução gratuita de reserva (MyMemory) também tem cota diária; o tradutor embutido do Chrome não tem limite.
 - O catálogo é atualizado a cada 6 horas, não em tempo real.
 
 ## Ideias para o futuro

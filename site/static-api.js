@@ -93,12 +93,19 @@
   }
 
   /* ---------- GitHub (chamado direto do navegador) ---------- */
+  // A API do GitHub dá só 60 consultas por hora por computador. Depois que estoura, para de tentar e usa o jsDelivr.
+  let apiBlockedUntil = 0;
+  const rateError = () => {
+    const mins = Math.max(1, Math.ceil((apiBlockedUntil - Date.now()) / 60000));
+    return Object.assign(new Error(`O GitHub limitou as consultas deste computador por agora. Volta em cerca de ${mins} minuto${mins > 1 ? 's' : ''}.`), { rate: true });
+  };
   async function gh(path) {
+    if (Date.now() < apiBlockedUntil) throw rateError();
     const res = await realFetch(`https://api.github.com${path}`, { headers: { Accept: 'application/vnd.github+json' } });
     if (res.status === 403 || res.status === 429) {
       const reset = Number(res.headers.get('x-ratelimit-reset'));
-      const mins = reset ? Math.max(1, Math.ceil((reset * 1000 - Date.now()) / 60000)) : 0;
-      throw Object.assign(new Error(`O GitHub limitou as consultas deste computador por agora${mins ? `. Tente de novo em ${mins} minuto${mins > 1 ? 's' : ''}` : ''}.`), { rate: true });
+      apiBlockedUntil = reset ? reset * 1000 : Date.now() + 10 * 60000;
+      throw rateError();
     }
     if (!res.ok) throw Object.assign(new Error(`O GitHub respondeu ${res.status}.`), { status: res.status });
     return res.json();
@@ -114,13 +121,28 @@
     });
   }
 
+  // Reserva sem limite de consultas: o jsDelivr lista os arquivos de qualquer repositório público do GitHub.
+  async function jsdelivrTree(source) {
+    const res = await realFetch(`https://data.jsdelivr.com/v1/packages/gh/${source}@HEAD?structure=flat`);
+    if (res.status === 403) throw new Error('O repositório é grande demais para ser lido pelo navegador.');
+    if (!res.ok) throw new Error(`Não consegui ler o repositório (${res.status}).`);
+    const d = await res.json();
+    return (d.files || []).map(f => ({ path: String(f.name).replace(/^\//, ''), type: 'blob', size: f.size || 0, mode: '100644' }));
+  }
+
   const trees = new Map();
   async function getTree(source) {
     if (!trees.has(source)) {
-      trees.set(source, gh(`/repos/${source}/git/trees/HEAD?recursive=1`).then(d => {
-        if (d.truncated) throw new Error('O repositório é grande demais para ser lido pelo navegador.');
-        return d.tree || [];
-      }).catch(e => { trees.delete(source); throw e; }));
+      trees.set(source, (async () => {
+        try {
+          const d = await gh(`/repos/${source}/git/trees/HEAD?recursive=1`);
+          if (d.truncated) throw new Error('O repositório é grande demais para ser lido pelo navegador.');
+          return d.tree || [];
+        } catch (e) {
+          if (e.rate || (e.status && e.status >= 500)) return jsdelivrTree(source);
+          throw e;
+        }
+      })().catch(e => { trees.delete(source); throw e; }));
     }
     return trees.get(source);
   }
@@ -159,7 +181,7 @@
         const found = findSkillPath(paths, skillId);
         candidates = found ? [found] : [];
       } catch (e) {
-        if (!e.rate && e.status !== 404) throw e;
+        if (e.status === 400) throw e; // sem a lista de arquivos: tenta os caminhos mais comuns
         candidates = [`skills/${skillId}/SKILL.md`, `${skillId}/SKILL.md`, `.claude/skills/${skillId}/SKILL.md`, 'SKILL.md']; // sem a API: tenta os caminhos comuns
       }
       for (const file of candidates) {
@@ -192,7 +214,7 @@
           },
         };
       });
-    } catch { return base; }
+    } catch (e) { return { ...base, limited: !!e.rate }; }
   }
 
   const MAX_FILES = 300, MAX_BYTES = 8 * 1024 * 1024;

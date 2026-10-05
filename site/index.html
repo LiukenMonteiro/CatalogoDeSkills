@@ -749,7 +749,7 @@ function renderPlate(animate) {
   if (STATIC && !(state.fs && state.fs.granted)) {
     $('plateCount').textContent = '—';
     const can = state.fs && state.fs.supported;
-    kids.push(line(el('p', { className: 'empty', textContent: can ? 'Conecte a pasta de skills para ver as suas instaladas aqui.' : 'Este navegador não lê a sua pasta de skills. No Chrome ou no Edge você instala com um clique.' })));
+    kids.push(line(el('p', { className: 'empty', textContent: can ? 'Conecte a pasta de skills para ver as suas instaladas aqui.' : brave.is ? `No Brave, ative a gravação em pasta em ${BRAVE_FLAG} e reinicie o navegador.` : 'Este navegador não lê a sua pasta de skills. No Chrome ou no Edge você instala com um clique.' })));
     if (can) {
       const b = el('button', { className: 'plate-btn', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
       b.onclick = connectFolderUI;
@@ -1090,6 +1090,7 @@ async function showRepo(s) {
     const r = await api(`/api/repo?source=${encodeURIComponent(s.source)}`);
     if (state.current !== s) return;
     const st = r.stats;
+    if (!st && r.limited) { $('dRepoStats').textContent = 'O GitHub limitou as consultas por agora; as estrelas voltam em alguns minutos.'; return; }
     $('dRepoStats').textContent = st
       ? [`★ ${fmt(st.stars)}`, st.language, st.license, st.archived ? 'arquivado' : (st.pushedAt ? `atualizado ${ago(st.pushedAt)}` : null)].filter(Boolean).join(' · ')
       : 'Dados do repositório indisponíveis agora';
@@ -1107,9 +1108,15 @@ function syncDrawer() {
   note.hidden = true;
   if (STATIC && s.source && !isInst(s) && window.CAT) {
     const text = !window.CAT.supported
-      ? 'Este navegador não grava na sua pasta. O botão copia um pedido para colar no Claude Code, que instala por você. No Chrome ou no Edge a instalação é com um clique.'
+      ? (brave.is
+        ? `No Brave, a gravação em pasta vem desligada. Para instalar com um clique, ative em ${BRAVE_FLAG} (escolha "Enabled", reinicie o Brave e volte aqui). Enquanto isso, o botão abaixo copia um pedido para o Claude Code instalar por você.`
+        : 'Este navegador não grava na sua pasta. O botão copia um pedido para colar no Claude Code, que instala por você. No Chrome ou no Edge a instalação é com um clique.')
       : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta .claude do seu computador. É uma vez só.' : '';
-    if (text) { note.textContent = text; note.hidden = false; }
+    if (text) {
+      note.replaceChildren(text);
+      if (!window.CAT.supported && brave.is) { const b = el('button', { className: 'linkbtn', type: 'button', textContent: ' Copiar endereço da opção' }); b.onclick = copyBraveFlag; note.append(b); }
+      note.hidden = false;
+    }
   }
 }
 
@@ -1210,6 +1217,14 @@ $('close').onclick = () => $('dlg').close();
 $('dlg').addEventListener('click', e => { if (e.target === $('dlg')) $('dlg').close(); });
 
 /* ---------- site público: pasta de skills, perfil local, coleções e estrelas ---------- */
+// O Brave traz a gravação em pasta desligada; dá para ligar numa opção própria dele.
+const BRAVE_FLAG = 'brave://flags/#file-system-access-api';
+const brave = { is: false };
+if (STATIC && navigator.brave && navigator.brave.isBrave) {
+  navigator.brave.isBrave().then(v => { brave.is = !!v; if (v) { syncDrawer(); renderPlate(false); if (state.view === 'profile') renderProfile(); } }).catch(() => {});
+}
+const copyBraveFlag = () => navigator.clipboard?.writeText(BRAVE_FLAG).then(() => toast('Endereço copiado. Cole na barra de endereço do Brave.'), () => toast('Digite ' + BRAVE_FLAG, true));
+
 function claudeDirHint() {
   const ua = navigator.userAgent;
   if (/Windows/i.test(ua)) return { path: '%USERPROFILE%\\.claude', tip: 'No Windows, cole esse caminho no campo "Nome da pasta" do seletor. (A pasta fica em C:\\Users\\SEU-NOME\\.claude.)' };
@@ -1265,7 +1280,8 @@ function folderNeededBox() {
   const can = state.fs && state.fs.supported;
   const kids = [el('p', { textContent: can
     ? 'Conecte a pasta de skills para ver aqui o que você já instalou.'
-    : 'Este navegador não consegue ler a sua pasta de skills. Use o Chrome ou o Edge para ver e gerenciar o que está instalado.' })];
+    : brave.is ? `No Brave, a leitura da pasta vem desligada. Ative em ${BRAVE_FLAG} (escolha "Enabled" e reinicie o navegador) para ver e gerenciar o que está instalado.` : 'Este navegador não consegue ler a sua pasta de skills. Use o Chrome ou o Edge para ver e gerenciar o que está instalado.' })];
+  if (!can && brave.is) { const b = el('button', { className: 'btn small', type: 'button', textContent: 'Copiar endereço da opção' }); b.onclick = copyBraveFlag; kids.push(b); }
   if (can) {
     const b = el('button', { className: 'btn small', type: 'button', textContent: state.fs.connected ? 'Liberar acesso à pasta' : 'Conectar pasta' });
     b.onclick = connectFolderUI;
@@ -1294,17 +1310,20 @@ function openProfileEditor() {
     const login = loginInput.value.trim().replace(/^@/, '');
     if (!/^[A-Za-z0-9-]{1,39}$/.test(login)) { setErr('Digite um usuário do GitHub válido (letras, números e hífen).'); return false; }
     setErr('');
+    // A foto vem do endereço público github.com/<usuário>.png, que não gasta o limite da API (404 = usuário não existe).
+    const url = `https://github.com/${login}.png?size=160`;
     try {
-      const res = await fetch(`https://api.github.com/users/${login}`);
-      if (res.status === 404) throw new Error('Não encontrei esse usuário no GitHub.');
-      if (res.status === 403) throw new Error('O GitHub limitou as consultas por agora. Tente de novo mais tarde.');
-      const d = await res.json();
-      draft.avatar = okAvatar(d.avatar_url) ? d.avatar_url : '';
-      loginInput.value = d.login;
-      if (!nameInput.value.trim()) nameInput.value = d.name || d.login;
-      drawAvatar();
-      return true;
+      await new Promise((res, rej) => { const im = new Image(); im.onload = res; im.onerror = () => rej(new Error('Não encontrei esse usuário no GitHub.')); im.src = url; });
     } catch (e) { setErr(e.message); return false; }
+    draft.avatar = url;
+    loginInput.value = login;
+    if (!nameInput.value.trim()) { // o nome de exibição vem da API; se ela estiver limitada, usa o usuário
+      let display = login;
+      try { const r = await fetch(`https://api.github.com/users/${login}`); if (r.ok) display = (await r.json()).name || login; } catch {}
+      nameInput.value = display;
+    }
+    drawAvatar();
+    return true;
   };
   const lookupBtn = el('button', { className: 'btn quiet', type: 'button', textContent: 'Buscar foto' });
   lookupBtn.onclick = async () => { lookupBtn.disabled = true; await lookup(); lookupBtn.disabled = false; };
