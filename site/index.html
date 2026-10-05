@@ -287,7 +287,8 @@
   .pf-line .field { flex: 1; min-width: 0; }
   .pf-line .btn { width: auto; height: 46px; padding: 0 16px; font-size: 14px; }
   .steps li code { word-break: break-all; }
-  #dStar[hidden], #dNote[hidden] { display: none; }
+  #dStar[hidden], #dNote[hidden], #dAlt[hidden] { display: none; }
+  .altrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   /* login */
   .stack { display: flex; flex-direction: column; gap: 18px; }
@@ -435,6 +436,10 @@
       <div><dt>Destino</dt><dd id="dDest"></dd></div>
     </dl>
     <button class="btn" id="dAction" type="button">Instalar</button>
+    <div class="altrow" id="dAlt" hidden>
+      <button class="toggle" id="dAltCli" type="button">Abrir no terminal</button>
+      <button class="toggle" id="dAltCopy" type="button">Copiar pedido</button>
+    </div>
     <p class="note flat" id="dNote" hidden></p>
     <button class="toggle" id="dFav" type="button" aria-pressed="false"></button>
     <div class="log" id="dLog" aria-live="polite"></div>
@@ -1106,11 +1111,12 @@ function syncDrawer() {
   setAction(s);
   const note = $('dNote');
   note.hidden = true;
+  $('dAlt').hidden = !(STATIC && s.source && !isInst(s) && window.CAT && !window.CAT.supported);
   if (STATIC && s.source && !isInst(s) && window.CAT) {
     const text = !window.CAT.supported
       ? (brave.is
-        ? `No Brave, a gravação em pasta vem desligada. Para instalar com um clique, ative em ${BRAVE_FLAG} (escolha "Enabled", reinicie o Brave e volte aqui). Enquanto isso, o botão abaixo copia um pedido para o Claude Code instalar por você.`
-        : 'Este navegador não grava na sua pasta. O botão copia um pedido para colar no Claude Code, que instala por você. No Chrome ou no Edge a instalação é com um clique.')
+        ? `Sem mexer em nada, o botão acima funciona: ele abre o Claude Code com o pedido pronto e você só aperta Enter. Para o clique único, o Brave exige ligar uma opção que vem desligada: ${BRAVE_FLAG} (escolha "Enabled", reinicie o Brave e volte aqui).`
+        : 'Este navegador não grava na sua pasta. O botão acima abre o Claude Code com o pedido pronto e você só aperta Enter. No Chrome ou no Edge a instalação é com um clique.')
       : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta .claude do seu computador. É uma vez só.' : '';
     if (text) {
       note.replaceChildren(text);
@@ -1156,10 +1162,19 @@ function setAction(s, busy) {
   b.hidden = !s.source && !inst;
   b.disabled = !!busy;
   b.className = 'btn' + (inst ? ' ghost' : '');
-  b.textContent = busy ? (inst ? 'Removendo…' : 'Instalando…') : (inst ? 'Desinstalar' : copyMode ? 'Copiar pedido para o Claude' : 'Instalar');
+  b.textContent = busy ? (inst ? 'Removendo…' : 'Instalando…') : (inst ? 'Desinstalar' : copyMode ? 'Instalar com o Claude Code' : 'Instalar');
 }
 
 const claudeRequest = s => `Instale a skill "${s.skillId}" do repositório https://github.com/${s.source} na minha pasta global de skills (~/.claude/skills/${s.skillId}). Faça um clone raso, copie só a pasta dessa skill, leia o SKILL.md e me avise se houver algo suspeito antes de eu usar.`;
+// Links oficiais do Claude Code: abrem o VS Code (ou o terminal) com o pedido já digitado; nada é enviado até a pessoa apertar Enter.
+const deepLink = (s, kind) => kind === 'cli'
+  ? `claude-cli://open?q=${encodeURIComponent(claudeRequest(s))}`
+  : `vscode://anthropic.claude-code/open?prompt=${encodeURIComponent(claudeRequest(s))}`;
+function openLink(url) { const a = el('a', { href: url }); document.body.append(a); a.click(); a.remove(); }
+async function copyRequest(s) {
+  try { await navigator.clipboard.writeText(claudeRequest(s)); toast('Pedido copiado. Cole no Claude Code.'); return true; }
+  catch { toast('Não consegui copiar sozinho.', true); return false; }
+}
 
 function showStarCta() {
   if (lsGet('catalogo.starClicked', false)) return;
@@ -1173,13 +1188,12 @@ let confirmTimer;
 $('dAction').onclick = async () => {
   const s = state.current; if (!s) return;
   const removing = isInst(s);
-  if (!removing && STATIC && window.CAT && !window.CAT.supported) { // navegador sem acesso à pasta: o Claude instala
-    const text = claudeRequest(s);
+  if (!removing && STATIC && window.CAT && !window.CAT.supported) { // navegador sem acesso à pasta: o Claude Code instala
     logReset();
-    try { await navigator.clipboard.writeText(text); logLine('✓ pedido copiado', 'ok'); toast('Pedido copiado. Cole no Claude Code.'); }
-    catch { logLine('Não consegui copiar sozinho. Copie o texto abaixo:'); }
-    logLine(text);
-    logLine('Cole no Claude Code: ele baixa a skill para a sua pasta e confere o conteúdo antes de você usar.');
+    logLine(`✓ abrindo o Claude Code (VS Code) com o pedido pronto`, 'ok');
+    logLine('Confira o texto que apareceu e aperte Enter. O Claude baixa a skill para a sua pasta e confere o conteúdo antes.');
+    logLine('Nada abriu? Abra o VS Code com a extensão Claude Code, ou use "Abrir no terminal" ou "Copiar pedido" logo abaixo.');
+    openLink(deepLink(s, 'vscode'));
     return;
   }
   if (removing && !$('dAction').dataset.sure) { // apagar é definitivo: pede um segundo clique
@@ -1213,6 +1227,8 @@ $('dAction').onclick = async () => {
   setAction(s);
 };
 $('dFav').onclick = () => state.current && toggleList('favorites', state.current);
+$('dAltCli').onclick = () => { const s = state.current; if (!s) return; logReset(); logLine('✓ abrindo o Claude Code no terminal com o pedido pronto', 'ok'); logLine('Funciona se o Claude Code já foi usado nesta máquina. Confira o texto e aperte Enter.'); openLink(deepLink(s, 'cli')); };
+$('dAltCopy').onclick = async () => { const s = state.current; if (!s) return; logReset(); if (await copyRequest(s)) logLine('✓ pedido copiado. Cole no Claude Code e aperte Enter.', 'ok'); logLine(claudeRequest(s)); };
 $('close').onclick = () => $('dlg').close();
 $('dlg').addEventListener('click', e => { if (e.target === $('dlg')) $('dlg').close(); });
 

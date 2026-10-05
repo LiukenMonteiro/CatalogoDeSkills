@@ -25,19 +25,22 @@
 
 ### No site (recomendado)
 
-1. Abra o site no **Chrome, Edge ou Opera** (computador). No **Brave**, antes ligue a gravação em pasta (veja o quadro abaixo).
+1. Abra o site no **Chrome, Edge ou Opera** (computador). No **Brave** ou no Firefox, veja o quadro logo abaixo.
 2. Escolha uma skill e clique em **Instalar**.
 3. Na primeira vez, o site pede a pasta `.claude` do seu computador. Siga o passo a passo da janela e confirme em **Permitir**.
 
 Pronto: a skill aparece no Claude Code, normalmente sem precisar reiniciar.
 
 <details>
-<summary>Usa o Brave? Ligue a gravação em pasta (uma vez)</summary>
+<summary>Usa o Brave (ou outro navegador sem gravação em pasta)?</summary>
 
-O Brave traz esse recurso desligado por padrão. Cole `brave://flags/#file-system-access-api` na barra de endereço, mude a opção para **Enabled**, reinicie o Brave e volte ao site. O próprio site mostra esse passo a passo (com um botão para copiar o endereço) quando detecta o Brave.
+O Brave traz a gravação em pasta **desligada por padrão**, e nenhum site consegue ligá-la. Você tem duas saídas:
+
+1. **Instalar com o Claude Code, sem mexer em nada.** O botão vira **Instalar com o Claude Code**: ele abre o VS Code (extensão Claude Code) com o pedido já digitado, e você só confere o texto e aperta **Enter**. Há também **Abrir no terminal** (precisa do Claude Code já usado uma vez nessa máquina) e **Copiar pedido**. Usa os [links oficiais do Claude Code](https://code.claude.com/docs/en/deep-links); nada é enviado até você apertar Enter.
+2. **Ligar o clique único no Brave (uma vez).** Cole `brave://flags/#file-system-access-api` na barra de endereço, mude a opção para **Enabled**, reinicie o Brave e volte ao site. O site mostra esse passo a passo, com um botão para copiar o endereço, quando detecta o Brave.
+
+Firefox, Safari e o navegador embutido do VS Code ou do Cursor também usam a saída 1.
 </details>
-
-Em outros navegadores (Firefox, Safari, o navegador embutido do VS Code ou do Cursor) o site não consegue gravar na sua pasta. Nesse caso o botão vira **Copiar pedido para o Claude**: você cola o pedido no Claude Code e ele baixa a skill e confere o conteúdo para você.
 
 ### Rodar na sua máquina (para quem desenvolve)
 
