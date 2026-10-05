@@ -1416,6 +1416,12 @@ $('dAction').onclick = async () => {
       logLine(r.removed === 'atalho' ? 'Só o atalho foi removido; o original continua onde estava.' : 'Pasta apagada.');
     } else {
       logLine(STATIC ? `✓ gravada em ${dest}` : `✓ copiada para ${dest}`, 'ok');
+      if (r.skipped?.length) {
+        logLine(`⚠ ${r.skipped.length} arquivo(s) não puderam ser gravados e foram pulados:`, 'bad');
+        for (const k of r.skipped.slice(0, 8)) logLine(`  ${k.path} — ${k.reason}`);
+        if (r.skipped.length > 8) logLine(`  … e mais ${r.skipped.length - 8}`);
+        logLine('A skill foi instalada sem eles. Se ela precisar desses arquivos, tente de novo ou use "Instalar com o Claude Code".');
+      }
       logLine('Já deve estar disponível no Claude Code. Se não aparecer, reinicie-o.');
       showStarCta();
     }

@@ -375,34 +375,45 @@
     const skills = await skillsDirOf(h, true);
     try { await skills.getDirectoryHandle(skillId); throw new Error(`"${skillId}" já existe nessa pasta.`); }
     catch (e) { if (e.name !== 'NotFoundError') throw e; }
+    for (const f of files) if (!safePath(f.path)) throw new Error(`Caminho de arquivo inválido: ${f.path}`);
     const root = await skills.getDirectoryHandle(skillId, { create: true });
+    const skipped = [];
     try {
-      for (const f of files) {
-        if (!safePath(f.path)) throw new Error(`Caminho de arquivo inválido: ${f.path}`);
+      // SKILL.md e arquivos de texto primeiro: se o essencial não grava, a instalação é desfeita
+      const essential = f => /(^|\/)SKILL\.md$/i.test(f.path);
+      const ordered = [...files].sort((x, y) => essential(y) - essential(x));
+      for (const f of ordered) {
         const parts = f.path.split('/');
-        let dir = root;
-        for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg, { create: true });
-        try { await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data)); }
+        const put = async () => {
+          let dir = root;
+          for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg, { create: true });
+          await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data));
+        };
+        try { await put(); }
         catch (err) {
-          // uma segunda tentativa resolve travas passageiras do sistema de arquivos
-          try { await new Promise(r => setTimeout(r, 300)); await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data)); }
-          catch (err2) { throw new Error(`Não consegui gravar "${f.path}" (${err2.name || 'erro'}: ${err2.message}).`); }
+          try { await new Promise(r => setTimeout(r, 300)); await put(); } // uma segunda tentativa resolve travas passageiras
+          catch (err2) {
+            if (essential(f)) throw new Error(`Não consegui gravar "${f.path}" (${err2.name || 'erro'}: ${err2.message}).`);
+            skipped.push({ path: f.path, reason: `${err2.name || 'erro'}: ${err2.message}` });
+          }
         }
       }
+      if (skipped.length > files.length / 2) throw new Error(`Muitos arquivos falharam (${skipped.length} de ${files.length}). Primeiro: "${skipped[0].path}" (${skipped[0].reason}).`);
       const mark = await (await root.getFileHandle('.catalogo-skill.json', { create: true })).createWritable();
       await mark.write(JSON.stringify({ source, skillId, installedAt: new Date().toISOString(), via: 'site' }, null, 2)); await mark.close();
     } catch (e) {
       await skills.removeEntry(skillId, { recursive: true }).catch(() => {}); // não deixa uma instalação pela metade
       throw e;
     }
+    return skipped;
   }
 
   async function installSkill(source, skillId) {
     if (!FS_OK) throw new Error('Este navegador não consegue gravar na sua pasta. Use o Chrome ou o Edge.');
     const h = await folder({ ask: true }); // antes de qualquer espera: precisa do clique
     const { files } = await skillFiles(source, skillId);
-    await writeSkill(h, skillId, source, files);
-    return { ok: true, files: files.length };
+    const skipped = await writeSkill(h, skillId, source, files);
+    return { ok: true, files: files.length - skipped.length, skipped };
   }
 
   async function removeSkill(skillId) {
