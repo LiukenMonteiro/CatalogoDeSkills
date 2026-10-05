@@ -270,6 +270,40 @@
   .star-btn b { font-weight: 600; }
   .starcta { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 14px; background: var(--orange); color: var(--black); border-radius: 4px; font: 600 13px var(--mono); text-decoration: none; }
   .starcta:hover { background: var(--orange-hot); }
+  /* ---------- guia: o que são skills ---------- */
+  .guide-btn { flex: none; display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font: 500 13px var(--mono); color: var(--text); text-decoration: none; transition: border-color .15s; }
+  .guide-btn:hover, .guide-btn[aria-current="true"] { border-color: var(--orange); }
+  .guide-btn svg { width: 16px; height: 16px; fill: none; stroke: var(--orange); stroke-width: 1.8; }
+  .lede a { color: var(--orange); font-weight: 600; }
+  .guide { max-width: 860px; margin: 0 auto; padding: 56px var(--gutter) 72px; }
+  .guide h1 { margin: 0 0 14px; font-family: var(--display); font-variation-settings: "wdth" 66; font-weight: 850; font-size: clamp(40px, 6vw, 72px); line-height: .95; text-transform: uppercase; }
+  .guide h1 em { font-style: normal; color: var(--orange); }
+  .guide .lead { font-size: 18px; color: #d8d2c7; max-width: 640px; margin: 0 0 40px; }
+  .guide section { border-top: 1px solid var(--line); padding: 30px 0; }
+  .guide h2 { margin: 0 0 12px; font-family: var(--display); font-variation-settings: "wdth" 75; font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: .01em; }
+  .guide p { margin: 0 0 12px; color: #d8d2c7; max-width: 680px; }
+  .guide p b, .guide li b { color: var(--text); }
+  .guide ul { margin: 0 0 12px; padding-left: 20px; color: #d8d2c7; display: flex; flex-direction: column; gap: 6px; max-width: 680px; }
+  .guide code { font: 500 13px var(--mono); background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; }
+  .guide .key { background: var(--panel); border: 1px solid var(--orange); border-left-width: 4px; border-radius: 4px; padding: 20px 22px; margin: 4px 0 6px; }
+  .guide .key h2 { color: var(--orange); }
+  .guide .say { display: flex; align-items: center; gap: 12px; background: var(--black); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; margin: 8px 0; font: 500 13.5px var(--mono); }
+  .guide .say span { flex: 1; min-width: 0; word-break: break-word; }
+  .guide .say span i { font-style: normal; color: var(--orange); }
+  .guide .say button { flex: none; }
+  .guide .files { font: 500 13px/1.7 var(--mono); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; margin: 8px 0 14px; color: #d8d2c7; white-space: pre; overflow-x: auto; }
+  .guide .files em { font-style: normal; color: var(--muted); }
+  .guide dl { border: 0; }
+  .guide dt { font: 700 15px var(--body); color: var(--text); margin-top: 16px; text-align: left; }
+  .guide dd { margin: 4px 0 0; color: #d8d2c7; max-width: 680px; text-align: left; word-break: normal; }
+  .guide .go { margin-top: 18px; }
+  .usebox { background: var(--panel); border: 1px solid var(--orange); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .usebox b { font-size: 14px; }
+  .usebox p { margin: 0; font-size: 13px; color: #d8d2c7; }
+  .usebox .say { display: flex; align-items: center; gap: 10px; background: var(--black); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font: 500 12.5px var(--mono); }
+  .usebox .say span { flex: 1; min-width: 0; word-break: break-word; }
+  .usebox .say span i { font-style: normal; color: var(--orange); }
+  #dUse[hidden] { display: none; }
   footer.foot { border-top: 1px solid var(--line); padding: 28px 0 44px; color: var(--muted); font: 400 13px/1.7 var(--mono); }
   footer.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center; justify-content: space-between; }
   footer.foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line); }
@@ -320,7 +354,8 @@
     .lang { margin-left: auto; }
     .lang > span { display: none; }
     .lang select { max-width: 118px; }
-    .star-btn span { display: none; }
+    .star-btn span, .guide-btn span { display: none; }
+    .guide-btn { padding: 0 10px; }
     .me-btn span:not(.ph) { display: none; }
     .me-btn { padding: 0 10px; }
     .hero { padding: 36px 0 44px; }
@@ -351,6 +386,10 @@
       <span>Descrições</span>
       <select id="lang" aria-label="Idioma das descrições"></select>
     </label>
+    <a class="guide-btn" id="guideBtn" href="#guia" title="O que são skills e como usar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.500 3H20v15H6.500A2.500 2.500 0 0 0 4 20.500zM4 20.500A2.500 2.500 0 0 0 6.500 23H20v-5"/></svg>
+      <span>Guia</span>
+    </a>
     <a class="star-btn" id="starBtn" target="_blank" rel="noopener" title="Dar uma estrela no GitHub">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>
       <span>Estrela</span><b id="starCount"></b>
@@ -365,7 +404,7 @@
     <div class="wrap">
       <div>
         <h1>Novas habilidades para o seu <em>Claude</em></h1>
-        <p class="lede">Escolha uma skill e clique em instalar. Ela vai para a sua <b>pasta global</b> e passa a valer em todos os projetos, já pronta para usar.</p>
+        <p class="lede">Escolha uma skill e clique em instalar. Ela vai para a sua <b>pasta global</b> e passa a valer em todos os projetos, já pronta para usar. <a href="#guia">Nunca usou skills? Veja como funcionam.</a></p>
       </div>
       <aside class="plate" aria-label="Skills instaladas na sua máquina">
         <div class="plate-head"><span id="plateDir">~/.claude/skills</span><span id="plateCount">—</span></div>
@@ -412,8 +451,75 @@
   <main><div class="wrap"><div id="cGrid" class="grid" aria-live="polite"></div></div></main>
 </div>
 
+<!-- ===== guia ===== -->
+<div id="viewGuide" hidden>
+  <article class="guide">
+    <h1>O que são <em>skills</em> e como usar</h1>
+    <p class="lead">Uma skill é um manual que o Claude lê quando precisa fazer uma tarefa específica. Instalar não basta: veja abaixo como pedir para ele usar.</p>
+
+    <section>
+      <h2>O que é uma skill</h2>
+      <p>É uma pasta com um arquivo <code>SKILL.md</code>: instruções escritas por alguém que já resolveu aquele problema, como fazer um PDF, revisar código ou montar uma apresentação. Algumas trazem também scripts e modelos.</p>
+      <div class="files">minha-skill/
+├─ SKILL.md      <em>nome, descrição e o passo a passo</em>
+├─ scripts/      <em>opcional: programas que a skill usa</em>
+└─ modelos/      <em>opcional: arquivos de apoio</em></div>
+      <p>Sem a skill, o Claude responde com o que já sabe. Com ela, ele segue o método de quem é especialista no assunto.</p>
+    </section>
+
+    <section class="key">
+      <h2>Importante: peça pelo nome</h2>
+      <p>Depois de instalada, a skill <b>fica guardada, mas não é usada automaticamente</b> em toda conversa. O Claude só enxerga o nome e uma linha de descrição de cada skill. Ele até pode usar uma sozinho quando a tarefa combina com a descrição, mas não dá para contar com isso.</p>
+      <p>O jeito garantido é dizer o nome na hora de pedir:</p>
+      <div class="say"><span>Use a skill <i>nome-da-skill</i> para <i>fazer isso</i></span><button class="btn small" type="button" data-copy="Use a skill nome-da-skill para ">Copiar</button></div>
+      <div class="say"><span>/<i>nome-da-skill</i></span><button class="btn small" type="button" data-copy="/nome-da-skill">Copiar</button></div>
+      <p>A segunda forma é um atalho do Claude Code: digite <code>/</code> e o nome da skill. O nome certo aparece no painel de cada skill aqui no catálogo e na aba <b>Instaladas</b>.</p>
+    </section>
+
+    <section>
+      <h2>Como usar, passo a passo</h2>
+      <ul>
+        <li><b>Instale</b> a skill pelo catálogo. Se ela não aparecer no Claude Code, feche e abra o Claude de novo.</li>
+        <li><b>Abra o Claude Code</b> no projeto em que quer trabalhar.</li>
+        <li><b>Peça a tarefa citando a skill</b>, por exemplo: <code>Use a skill pdf para juntar estes três arquivos</code>.</li>
+        <li><b>Não lembra o que tem instalado?</b> Pergunte ao Claude: <code>Quais skills você tem disponíveis?</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Onde ficam as skills</h2>
+      <ul>
+        <li><b>Globais</b> (as que este catálogo instala): ficam em <code>~/.claude/skills</code> e valem em todos os seus projetos.</li>
+        <li><b>Só de um projeto:</b> ficam em <code>.claude/skills</code> dentro da pasta do projeto e valem só ali.</li>
+      </ul>
+      <p>Desinstalar apaga a pasta da skill. Você pode instalar de novo quando quiser.</p>
+    </section>
+
+    <section>
+      <h2>Cuidados</h2>
+      <p>Uma skill pode incluir scripts que o Claude executa no seu computador. Antes de instalar, abra <b>Ler o SKILL.md</b> no painel da skill, olhe as estrelas e a data do repositório e prefira autores em quem você confia.</p>
+    </section>
+
+    <section>
+      <h2>Perguntas rápidas</h2>
+      <dl>
+        <dt>Preciso saber programar?</dt>
+        <dd>Não. Você instala com um clique e pede em português normal.</dd>
+        <dt>Instalei, mas o Claude não usou.</dt>
+        <dd>Cite o nome da skill no pedido, como no quadro laranja acima. Se ela nem aparece na lista do Claude, reinicie o Claude Code.</dd>
+        <dt>Dá para usar mais de uma skill?</dt>
+        <dd>Dá. Cite as duas: <code>Use as skills a e b para…</code></dd>
+        <dt>Quanto custa?</dt>
+        <dd>Skills são grátis. O Claude Code segue o seu plano de sempre.</dd>
+      </dl>
+      <button class="btn go" id="guideGo" type="button">Escolher skills no catálogo</button>
+    </section>
+  </article>
+</div>
+
 <footer class="foot"><div class="wrap">
   <span>Feito por <a id="fAuthor" target="_blank" rel="noopener"></a> · código aberto (MIT)</span>
+  <a href="#guia">Como usar skills</a>
   <a id="fRepo" target="_blank" rel="noopener">⭐ Gostou? Deixe uma estrela no GitHub</a>
   <span>As skills são dos seus autores; este site só aponta para elas.</span>
 </div></footer>
@@ -441,6 +547,12 @@
       <button class="toggle" id="dAltCopy" type="button">Copiar pedido</button>
     </div>
     <p class="note flat" id="dNote" hidden></p>
+    <div class="usebox" id="dUse" hidden>
+      <b>Como usar no Claude</b>
+      <p>Ela não entra sozinha em toda conversa. Cite o nome ao pedir:</p>
+      <div class="say"><span id="dUseText"></span><button class="btn small" id="dUseCopy" type="button">Copiar</button></div>
+      <p><a href="#guia" id="dUseGuide">Entenda como skills funcionam</a></p>
+    </div>
     <button class="toggle" id="dFav" type="button" aria-pressed="false"></button>
     <div class="log" id="dLog" aria-live="polite"></div>
     <a class="starcta" id="dStar" target="_blank" rel="noopener" hidden>⭐ Gostou? Deixe uma estrela no GitHub</a>
@@ -1040,7 +1152,7 @@ function renderProfile() {
 /* ---------- rotas ---------- */
 function route() {
   const h = location.hash;
-  const view = h.startsWith('#perfil') ? 'profile' : h.startsWith('#colecao=') ? 'collection' : 'catalog';
+  const view = h.startsWith('#guia') ? 'guide' : h.startsWith('#perfil') ? 'profile' : h.startsWith('#colecao=') ? 'collection' : 'catalog';
   const was = state.view;
   state.view = view;
   if (was !== view && (was === 'profile' || view === 'profile')) {
@@ -1050,13 +1162,15 @@ function route() {
   $('viewCatalog').hidden = view !== 'catalog';
   $('viewProfile').hidden = view !== 'profile';
   $('viewCollection').hidden = view !== 'collection';
+  $('viewGuide').hidden = view !== 'guide';
+  $('guideBtn').setAttribute('aria-current', String(view === 'guide'));
   renderMeBtn();
   if (view === 'profile') {
     state.ptab = h.includes('/favoritas') ? 'favoritas' : 'instaladas';
     renderProfile();
   } else if (view === 'collection') {
     renderCollection();
-  } else if (state.items.length) {
+  } else if (view === 'catalog' && state.items.length) {
     render();
   }
   scrollTo({ top: 0, behavior: 'instant' });
@@ -1064,6 +1178,13 @@ function route() {
 addEventListener('hashchange', route);
 $('brand').onclick = () => { if (location.hash) location.hash = ''; else scrollTo({ top: 0, behavior: 'smooth' }); };
 $('meBtn').onclick = () => { location.hash = '#perfil'; };
+$('guideGo').onclick = () => { location.hash = ''; };
+$('dUseGuide').onclick = () => $('dlg').close();
+// botões "Copiar" com o texto em data-copy
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  navigator.clipboard.writeText(b.dataset.copy).then(() => toast('Copiado. Cole no Claude Code.'), () => toast('Não consegui copiar sozinho.', true));
+});
 
 /* ---------- painel de detalhe ---------- */
 const logBox = () => $('dLog');
@@ -1122,6 +1243,12 @@ function syncDrawer() {
   $('dFav').setAttribute('aria-pressed', String(fav));
   $('dFav').innerHTML = ICON.heart + (fav ? 'Favorita' : 'Favoritar');
   setAction(s);
+  const useBox = $('dUse');
+  useBox.hidden = !(isInst(s) && s.skillId);
+  if (!useBox.hidden) {
+    $('dUseText').replaceChildren('Use a skill ', el('i', { textContent: s.skillId }), ' para …');
+    $('dUseCopy').dataset.copy = `Use a skill ${s.skillId} para `;
+  }
   const note = $('dNote');
   note.hidden = true;
   $('dAlt').hidden = !(STATIC && s.source && !isInst(s) && window.CAT && !window.CAT.supported);
@@ -1603,6 +1730,7 @@ async function startLogin() {
 $('searchForm').onsubmit = e => {
   e.preventDefault();
   if (state.view === 'profile') return; // no perfil a busca filtra ao digitar; não vai para o catálogo
+  if (state.view === 'guide') { history.replaceState(null, '', location.pathname + location.search); route(); }
   if (state.view === 'collection') { history.replaceState(null, '', location.pathname + location.search); route(); }
   const q = $('q').value.trim();
   if (!q) { state.query = ''; selectCategory(state.category, state.label); return; }

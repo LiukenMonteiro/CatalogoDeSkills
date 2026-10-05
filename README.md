@@ -16,6 +16,7 @@
 - **Instalar com um clique.** O site grava a skill direto na sua pasta `~/.claude/skills`. Na primeira vez você escolhe a pasta (uma vez só); depois é só clicar em **Instalar**. A skill já vale em todos os seus projetos.
 - **Achar o que importa.** Busca no catálogo inteiro, 12 categorias, **Em alta** (o que mais cresceu hoje) e **Novidades** (skills que acabaram de aparecer).
 - **Conhecer antes de instalar.** Descrição traduzida para o seu idioma (os nomes ficam em inglês, para você conseguir buscar), dados do repositório (estrelas, linguagem, licença, última atualização), link para o autor e o `SKILL.md` completo para ler.
+- **Aprender a usar.** A página **Guia** explica o que é uma skill e avisa o essencial: depois de instalada, é preciso pedir pelo nome ("use a skill X para…"). O painel de cada skill instalada já traz esse pedido pronto para copiar.
 - **Guardar o que gostou.** Favoritas, perfil com nome e foto, exportar/importar e **link da sua coleção** para compartilhar com amigos.
 - **Gerenciar o que já tem.** A aba *Instaladas* lê a sua pasta de skills, mostra a mais recente primeiro e desinstala com dois cliques.
 
