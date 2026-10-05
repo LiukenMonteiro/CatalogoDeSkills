@@ -363,6 +363,14 @@
   const b64ToBytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
   const safePath = p => p.split('/').every(seg => seg && seg !== '.' && seg !== '..' && !/[\\:]/.test(seg));
 
+  // grava em pedaços de 1 MB: arquivos grandes de uma vez só falham em alguns navegadores
+  async function writeFile(dir, name, bytes) {
+    const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
+    try {
+      for (let i = 0; i < bytes.length || i === 0; i += 1 << 20) await w.write(bytes.subarray(i, i + (1 << 20)));
+      await w.close();
+    } catch (e) { await w.abort().catch(() => {}); throw e; }
+  }
   async function writeSkill(h, skillId, source, files) {
     const skills = await skillsDirOf(h, true);
     try { await skills.getDirectoryHandle(skillId); throw new Error(`"${skillId}" já existe nessa pasta.`); }
@@ -374,8 +382,12 @@
         const parts = f.path.split('/');
         let dir = root;
         for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg, { create: true });
-        const w = await (await dir.getFileHandle(parts[parts.length - 1], { create: true })).createWritable();
-        await w.write(b64ToBytes(f.data)); await w.close();
+        try { await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data)); }
+        catch (err) {
+          // uma segunda tentativa resolve travas passageiras do sistema de arquivos
+          try { await new Promise(r => setTimeout(r, 300)); await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data)); }
+          catch (err2) { throw new Error(`Não consegui gravar "${f.path}" (${err2.name || 'erro'}: ${err2.message}).`); }
+        }
       }
       const mark = await (await root.getFileHandle('.catalogo-skill.json', { create: true })).createWritable();
       await mark.write(JSON.stringify({ source, skillId, installedAt: new Date().toISOString(), via: 'site' }, null, 2)); await mark.close();
