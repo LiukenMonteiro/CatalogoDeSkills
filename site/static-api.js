@@ -457,7 +457,26 @@
     return { skillId, name: fm.name || skillId, description: fm.description || '(sem descrição no SKILL.md)', content: text.slice(0, 20000) };
   }
 
-  window.CAT = { supported: FS_OK, connect, folder, hasHandle: () => !!handle, ready, loadCatalog: () => loadCatalog(), lookup: ids => ids.map(id => (catalog && catalog.skills.find(s => s.id === id)) || null) };
+  // Teste de gravação: roda quando a instalação falha e diz o que o navegador aceita ou recusa nessa pasta.
+  async function diagnose() {
+    const out = [];
+    const h = await folder();
+    if (!h) return ['pasta: nenhuma pasta conectada'];
+    out.push(`pasta escolhida: ${h.name}`);
+    try { out.push(`permissão: ${await h.queryPermission({ mode: 'readwrite' })}`); } catch (e) { out.push(`permissão: ${e.name}`); }
+    let skills;
+    try { skills = await skillsDirOf(h, true); out.push(`pasta skills: ok (${skills.name})`); }
+    catch (e) { out.push(`pasta skills: ${e.name}: ${e.message}`); return out; }
+    const probe = async (label, fn) => { try { await fn(); out.push(`${label}: ok`); } catch (e) { out.push(`${label}: ${e.name}: ${e.message}`); } };
+    const put = async (dir, name, text) => { const w = await (await dir.getFileHandle(name, { create: true })).createWritable(); await w.write(text); await w.close(); };
+    await probe('gravar arquivo comum', async () => { await put(skills, 'catalogo-teste.txt', 'x'); await skills.removeEntry('catalogo-teste.txt'); });
+    await probe('gravar arquivo oculto (.nome)', async () => { await put(skills, '.catalogo-teste', 'x'); await skills.removeEntry('.catalogo-teste'); });
+    await probe('criar subpasta e gravar dentro', async () => { const d = await skills.getDirectoryHandle('catalogo-teste-dir', { create: true }); await put(d, 'a.txt', 'x'); await skills.removeEntry('catalogo-teste-dir', { recursive: true }); });
+    await probe('gravar arquivo de 3 MB', async () => { const w = await (await skills.getFileHandle('catalogo-teste.bin', { create: true })).createWritable(); await w.write(new Uint8Array(3 << 20)); await w.close(); await skills.removeEntry('catalogo-teste.bin'); });
+    return out;
+  }
+
+  window.CAT = { supported: FS_OK, connect, folder, diagnose, hasHandle: () => !!handle, ready, loadCatalog: () => loadCatalog(), lookup: ids => ids.map(id => (catalog && catalog.skills.find(s => s.id === id)) || null) };
 
   /* ---------- roteador das chamadas /api/* ---------- */
   let langs = null;

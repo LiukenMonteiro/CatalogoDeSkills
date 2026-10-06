@@ -1433,6 +1433,10 @@ $('dAction').onclick = async () => {
     if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: o Claude Code instala no lugar
       $('dAlt').hidden = false;
       logLine('O navegador não deixou gravar. Use "Abrir no terminal" ou "Copiar pedido" abaixo: o Claude Code instala sem depender do navegador.');
+      logLine('Teste de gravação nesta pasta (copie e me envie se o erro continuar):');
+      try { for (const l of await window.CAT.diagnose()) logLine('  ' + l, /: ok|escolhida|permissão: granted/.test(l) ? '' : 'bad'); }
+      catch (err) { logLine('  não consegui testar: ' + err.message, 'bad'); }
+      logLine('  navegador: ' + navigator.userAgent.replace(/^Mozilla\/5.0 /, ''));
     }
   }
   setAction(s);
