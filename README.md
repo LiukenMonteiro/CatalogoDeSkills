@@ -79,6 +79,10 @@ O catálogo só lê o seu nome e a sua foto públicos.
 
 ## Como funciona
 
+![Diagrama: de onde vêm os dados e como a skill chega na sua pasta](docs/arquitetura.png)
+
+<sub>Editável no Excalidraw: [`docs/arquitetura.excalidraw`](docs/arquitetura.excalidraw) (abra em excalidraw.com).</sub>
+
 ```
                  a cada 6 horas (GitHub Actions)
   skills.sh ───────────────────────────────────────► data/catalog.json  (13 mil skills, ~200 KB comprimido)
