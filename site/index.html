@@ -340,6 +340,7 @@
   #dStar[hidden], #dNote[hidden], #dAlt[hidden] { display: none; }
   .altrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .altrow .wide { grid-column: 1 / -1; }
+  .cmdbox { margin: 8px 0 0; background: var(--black); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; font: 500 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-all; color: #d8d2c7; }
   .claudeopts .altrow { margin-top: 10px; }
 
   /* login */
@@ -661,6 +662,15 @@ description: Cria relatórios em PDF a partir
   </div>
 </dialog>
 
+<!-- ===== pasta só leitura (navegador snap/flatpak no Linux) ===== -->
+<dialog id="roDlg" class="modal" aria-labelledby="roTitle">
+  <div class="dlg">
+    <button class="close" id="roClose" aria-label="Fechar">×</button>
+    <h3 id="roTitle">Liberar a gravação</h3>
+    <div class="stack" id="roBody"></div>
+  </div>
+</dialog>
+
 <!-- ===== perfil local (site público) ===== -->
 <dialog id="profileDlg" class="modal" aria-labelledby="pfTitle">
   <div class="dlg">
@@ -695,7 +705,7 @@ const ICON = {
 async function api(url, opts) {
   const res = await fetch(url, opts);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Erro ' + res.status);
+  if (!res.ok) throw Object.assign(new Error(data.error || 'Erro ' + res.status), { code: data.code, folder: data.folder });
   return data;
 }
 const post = (url, body = {}) => api(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -1465,7 +1475,11 @@ $('dAction').onclick = async () => {
   } catch (e) {
     working.classList.remove('spin');
     logLine(`✗ ${e.message}`, 'bad');
-    if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: o Claude Code instala no lugar
+    if (!removing && e.code === 'readonly' && IS_LINUX) { // pasta só leitura (snap/flatpak): passo a passo para liberar
+      $('dAlt').hidden = false; $('dAltCmd').hidden = !SHELL_OK; $('dAltPick').hidden = false;
+      logLine('Siga o passo a passo que abriu para liberar a gravação (uma vez só).');
+      openReadonlyGuide(s, e.folder);
+    } else if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: outras saídas
       $('dAlt').hidden = false;
       $('dAltCmd').hidden = !SHELL_OK;
       logLine(SHELL_OK
@@ -1498,7 +1512,8 @@ $('dAltPick').onclick = async () => {
     logReset();
     logLine(`✓ pasta "${h.name}" escolhida`, 'ok');
     if (h.name !== 'skills') logLine('Dica: escolher só a pasta skills (~/.claude/skills) dá menos acesso ao navegador do que a .claude inteira.');
-    logLine('Se a gravação continuar recusada (snap/flatpak), rode scripts/liberar-gravacao-linux.py e tente instalar de novo.');
+    if (IS_LINUX && await window.CAT.checkWritable().catch(() => true) === false) openReadonlyGuide(state.current, h.name);
+    else logLine('Pronto. Clique em Instalar.');
   } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
 };
 $('dAltCopy').onclick = async () => { const s = state.current; if (!s) return; logReset(); if (await copyRequest(s)) logLine('✓ pedido copiado. Cole no Claude Code e aperte Enter.', 'ok'); logLine(claudeRequest(s)); };
@@ -1528,6 +1543,38 @@ function openBraveGuide() {
   $('braveDlg').showModal();
 }
 $('bvClose').onclick = () => $('braveDlg').close();
+
+// Navegador snap/flatpak no Linux: o sistema entrega a pasta só para leitura. Um comando, rodado uma vez num
+// terminal do sistema, dá ao navegador a escrita só na pasta escolhida (scripts/liberar-gravacao-linux.py).
+const IS_LINUX = /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+const liberarCommand = folder => `python3 -c "import urllib.request as u; exec(u.urlopen('https://raw.githubusercontent.com/${CFG.repo}/HEAD/scripts/liberar-gravacao-linux.py').read())" --aplicar --pasta ~/.claude${folder === '.claude' ? '' : '/skills'}`;
+function openReadonlyGuide(s, folder) {
+  const cmd = liberarCommand(folder);
+  const copy = el('button', { className: 'btn small', type: 'button', textContent: 'Copiar comando' });
+  copy.onclick = () => navigator.clipboard?.writeText(cmd).then(() => toast('Comando copiado. Cole no terminal (Ctrl+Shift+V).'), () => toast('Selecione o comando e copie.', true));
+  const status = el('p', { className: 'note flat' });
+  const retry = el('button', { className: 'btn', type: 'button', textContent: 'Tentar de novo' });
+  retry.onclick = async () => {
+    retry.disabled = true; status.className = 'note flat'; status.textContent = 'Testando a pasta…';
+    const ok = await window.CAT.checkWritable().catch(() => false);
+    retry.disabled = false;
+    if (!ok) { status.className = 'err'; status.textContent = 'Ainda está só leitura. Confira se o terminal mostrou "liberado". Se mostrou, feche e abra o navegador e tente de novo.'; return; }
+    $('roDlg').close(); toast('Gravação liberada');
+    if (s && state.current === s && $('dlg').open && !isInst(s)) $('dAction').click(); // retoma a instalação
+  };
+  $('roBody').replaceChildren(
+    el('p', { className: 'desc', textContent: 'O seu navegador foi instalado de um jeito isolado (snap ou flatpak, comum no Linux), e o sistema entregou a pasta a ele só para leitura. Dá para liberar só essa pasta, uma vez:' }),
+    el('ol', { className: 'steps' },
+      el('li', {}, 'Abra um terminal do sistema com ', el('b', { textContent: 'Ctrl+Alt+T' }), '. O terminal do VS Code não serve: ele também é isolado.'),
+      el('li', {}, 'Cole este comando e aperte Enter. Ele mostra o que muda e só mexe nessa pasta.', el('pre', { className: 'cmdbox', textContent: cmd }), copy),
+      el('li', {}, 'Volte aqui e clique em ', el('b', { textContent: 'Tentar de novo' }), '.')),
+    ...(folder === '.claude' ? [el('p', { className: 'note flat', textContent: 'Dica: se puder, escolha só a pasta skills (botão "Escolher a pasta de novo"). Assim o navegador ganha acesso só a ela, e não à .claude inteira.' })] : []),
+    retry, status,
+    el('p', { className: 'note flat', textContent: 'Prefere não mexer nisso? Feche esta janela e use "Copiar comando de instalação", que instala pelo terminal.' }));
+  $('roDlg').showModal();
+}
+$('roClose').onclick = () => $('roDlg').close();
+$('roDlg').addEventListener('click', e => { if (e.target === $('roDlg')) $('roDlg').close(); });
 $('braveDlg').addEventListener('click', e => { if (e.target === $('braveDlg')) $('braveDlg').close(); });
 const copyBraveFlag = () => navigator.clipboard?.writeText(BRAVE_FLAG).then(() => toast('Endereço copiado. Cole na barra de endereço do Brave.'), () => toast('Digite ' + BRAVE_FLAG, true));
 
@@ -1577,6 +1624,7 @@ $('folderDlg').addEventListener('click', e => { if (e.target === $('folderDlg'))
 async function connectFolderUI() {
   try {
     await window.CAT.folder({ ask: true });
+    if (IS_LINUX && await window.CAT.checkWritable().catch(() => true) === false) openReadonlyGuide(null, window.CAT.folderName());
     await loadInstalled(); refreshView();
     toast('Pasta conectada');
   } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }

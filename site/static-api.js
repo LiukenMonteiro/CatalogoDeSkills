@@ -9,7 +9,7 @@
 
   const realFetch = window.fetch.bind(window);
   const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
-  const fail = (message, status = 500) => json({ error: message }, status);
+  const fail = (message, status = 500, extra = {}) => json({ error: message, ...extra }, status);
   const SOURCE_RE = /^[A-Za-z0-9][A-Za-z0-9_.-]*\/(?!\.+$)[A-Za-z0-9_.-]+$/;
   const SKILL_RE = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
   const HOUR = 36e5;
@@ -411,9 +411,30 @@
     return skipped;
   }
 
+  // Navegadores isolados (snap/flatpak no Linux) recebem a pasta escolhida só para leitura.
+  // Testa antes de baixar a skill, para a tela mostrar o passo a passo em vez de um erro no meio da instalação.
+  async function assertWritable(h) {
+    try {
+      const skills = await skillsDirOf(h, true);
+      const probe = '.catalogo-teste-gravacao';
+      const w = await (await skills.getFileHandle(probe, { create: true })).createWritable();
+      await w.write('ok'); await w.close();
+      await skills.removeEntry(probe);
+    } catch (e) {
+      if (e.name !== 'NoModificationAllowedError') throw e;
+      throw Object.assign(new Error('O sistema entregou a pasta ao navegador só para leitura.'), { status: 403, code: 'readonly', folder: h.name });
+    }
+  }
+  async function checkWritable() { // true, false (só leitura) ou null (nenhuma pasta conectada)
+    const h = await folder();
+    if (!h) return null;
+    try { await assertWritable(h); return true; } catch (e) { if (e.code === 'readonly') return false; throw e; }
+  }
+
   async function installSkill(source, skillId) {
     if (!FS_OK) throw new Error('Este navegador não consegue gravar na sua pasta. Use o Chrome ou o Edge.');
     const h = await folder({ ask: true }); // antes de qualquer espera: precisa do clique
+    await assertWritable(h);
     const { files } = await skillFiles(source, skillId);
     const skipped = await writeSkill(h, skillId, source, files);
     return { ok: true, files: files.length - skipped.length, skipped };
@@ -478,7 +499,7 @@
     return out;
   }
 
-  window.CAT = { supported: FS_OK, connect, folder, diagnose, hasHandle: () => !!handle, ready, loadCatalog: () => loadCatalog(), lookup: ids => ids.map(id => (catalog && catalog.skills.find(s => s.id === id)) || null) };
+  window.CAT = { supported: FS_OK, connect, folder, diagnose, checkWritable, folderName: () => handle && handle.name, hasHandle: () => !!handle, ready, loadCatalog: () => loadCatalog(), lookup: ids => ids.map(id => (catalog && catalog.skills.find(s => s.id === id)) || null) };
 
   /* ---------- roteador das chamadas /api/* ---------- */
   let langs = null;
@@ -544,7 +565,7 @@
       if (init.body) { try { body = JSON.parse(init.body); } catch {} }
       return json(await route(url.pathname, url.searchParams, (init.method || 'GET').toUpperCase(), body));
     } catch (e) {
-      return fail(e.message || 'Erro inesperado', e.status || 500);
+      return fail(e.message || 'Erro inesperado', e.status || 500, e.code ? { code: e.code, folder: e.folder } : {});
     }
   };
 })();
