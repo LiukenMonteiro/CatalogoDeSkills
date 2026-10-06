@@ -363,20 +363,23 @@
   const b64ToBytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
   const safePath = p => p.split('/').every(seg => seg && seg !== '.' && seg !== '..' && !/[\\:]/.test(seg));
 
+  // diz em qual passo o navegador recusou (o erro dele sozinho não informa)
+  const step = async (label, fn) => { try { return await fn(); } catch (e) { throw Object.assign(new Error(`${label} → ${e.name || 'erro'}: ${e.message}`), { name: e.name }); } };
   // grava em pedaços de 1 MB: arquivos grandes de uma vez só falham em alguns navegadores
   async function writeFile(dir, name, bytes) {
-    const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
+    const fh = await step('criar o arquivo', () => dir.getFileHandle(name, { create: true }));
+    const w = await step('abrir para gravar', () => fh.createWritable());
     try {
-      for (let i = 0; i < bytes.length || i === 0; i += 1 << 20) await w.write(bytes.subarray(i, i + (1 << 20)));
-      await w.close();
+      for (let i = 0; i < bytes.length || i === 0; i += 1 << 20) await step('gravar o conteúdo', () => w.write(bytes.subarray(i, i + (1 << 20))));
+      await step('fechar o arquivo', () => w.close());
     } catch (e) { await w.abort().catch(() => {}); throw e; }
   }
   async function writeSkill(h, skillId, source, files) {
-    const skills = await skillsDirOf(h, true);
+    const skills = await step('abrir a pasta skills', () => skillsDirOf(h, true));
     try { await skills.getDirectoryHandle(skillId); throw new Error(`"${skillId}" já existe nessa pasta.`); }
     catch (e) { if (e.name !== 'NotFoundError') throw e; }
     for (const f of files) if (!safePath(f.path)) throw new Error(`Caminho de arquivo inválido: ${f.path}`);
-    const root = await skills.getDirectoryHandle(skillId, { create: true });
+    const root = await step(`criar a pasta ${skillId}`, () => skills.getDirectoryHandle(skillId, { create: true }));
     const skipped = [];
     try {
       // SKILL.md e arquivos de texto primeiro: se o essencial não grava, a instalação é desfeita
@@ -386,7 +389,7 @@
         const parts = f.path.split('/');
         const put = async () => {
           let dir = root;
-          for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg, { create: true });
+          for (const seg of parts.slice(0, -1)) { const d = dir; dir = await step(`criar a subpasta ${seg}`, () => d.getDirectoryHandle(seg, { create: true })); }
           await writeFile(dir, parts[parts.length - 1], b64ToBytes(f.data));
         };
         try { await put(); }

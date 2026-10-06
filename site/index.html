@@ -1430,6 +1430,10 @@ $('dAction').onclick = async () => {
   } catch (e) {
     working.classList.remove('spin');
     logLine(`✗ ${e.message}`, 'bad');
+    if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: o Claude Code instala no lugar
+      $('dAlt').hidden = false;
+      logLine('O navegador não deixou gravar. Use "Abrir no terminal" ou "Copiar pedido" abaixo: o Claude Code instala sem depender do navegador.');
+    }
   }
   setAction(s);
 };
