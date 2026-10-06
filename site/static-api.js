@@ -124,22 +124,25 @@
   // Reserva sem limite de consultas: o jsDelivr lista os arquivos de qualquer repositório público do GitHub.
   async function jsdelivrTree(source) {
     const res = await realFetch(`https://data.jsdelivr.com/v1/packages/gh/${source}@HEAD?structure=flat`);
-    if (res.status === 403) throw new Error('O repositório é grande demais para ser lido pelo navegador.');
-    if (!res.ok) throw new Error(`Não consegui ler o repositório (${res.status}).`);
+    if (res.status === 403) throw Object.assign(new Error('O repositório é grande demais para o jsDelivr.'), { tooBig: true });
+    if (!res.ok) throw Object.assign(new Error(`Não consegui ler o repositório (${res.status}).`), { status: res.status });
     const d = await res.json();
     return (d.files || []).map(f => ({ path: String(f.name).replace(/^\//, ''), type: 'blob', size: f.size || 0, mode: '100644' }));
   }
 
+  // Lista os arquivos do repositório. Primeiro pelo jsDelivr, que não limita consultas; só o que é grande demais
+  // para ele (~50 MB) vai para a API do GitHub, que libera 60 consultas por hora por conexão.
   const trees = new Map();
   async function getTree(source) {
     if (!trees.has(source)) {
       trees.set(source, (async () => {
+        let jsErr;
+        try { return { entries: await jsdelivrTree(source), from: 'jsdelivr' }; } catch (e) { jsErr = e; }
         try {
           const d = await gh(`/repos/${source}/git/trees/HEAD?recursive=1`);
-          if (d.truncated) throw new Error('O repositório é grande demais para ser lido pelo navegador.');
-          return d.tree || [];
+          return { entries: d.tree || [], from: 'github', truncated: !!d.truncated };
         } catch (e) {
-          if (e.rate || (e.status && e.status >= 500)) return jsdelivrTree(source);
+          if (e.rate) throw Object.assign(new Error(`${jsErr.tooBig ? 'Este repositório é grande, e para ler ele o site precisa da API do GitHub, que libera 60 consultas por hora por conexão. ' : ''}${e.message}`), { code: 'ratelimit', status: 429 });
           throw e;
         }
       })().catch(e => { trees.delete(source); throw e; }));
@@ -177,9 +180,9 @@
     const p = (async () => {
       let candidates;
       try {
-        const paths = await cachedLS(`catalogo.sp.${source}`, 6 * HOUR, async () => (await getTree(source)).filter(e => e.type === 'blob' && /(^|\/)SKILL\.md$/.test(e.path)).map(e => e.path));
+        const paths = await cachedLS(`catalogo.sp.${source}`, 6 * HOUR, async () => (await getTree(source)).entries.filter(e => e.type === 'blob' && /(^|\/)SKILL\.md$/.test(e.path)).map(e => e.path));
         const found = findSkillPath(paths, skillId);
-        candidates = found ? [found] : [];
+        candidates = found ? [found] : [`skills/${skillId}/SKILL.md`, `${skillId}/SKILL.md`, `.claude/skills/${skillId}/SKILL.md`];
       } catch (e) {
         if (e.status === 400) throw e; // sem a lista de arquivos: tenta os caminhos mais comuns
         candidates = [`skills/${skillId}/SKILL.md`, `${skillId}/SKILL.md`, `.claude/skills/${skillId}/SKILL.md`, 'SKILL.md']; // sem a API: tenta os caminhos comuns
@@ -224,12 +227,22 @@
     for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
     return btoa(bin);
   }
+  const tooBigError = () => Object.assign(new Error('Este repositório é grande demais para o navegador listar os arquivos.'), { code: 'toobig' });
+  const keep = e => e.type === 'blob' && e.mode !== '120000' && !/(^|\/)(\.git|node_modules)\//.test(e.path);
   async function skillFiles(source, skillId) {
-    const tree = await getTree(source);
+    const { entries: tree, from, truncated } = await getTree(source);
     const md = findSkillPath(tree.filter(e => e.type === 'blob').map(e => e.path), skillId);
-    if (!md) throw new Error('Skill não encontrada dentro do repositório.');
+    if (!md) throw truncated ? tooBigError() : new Error('Skill não encontrada dentro do repositório.');
     const dir = md.includes('/') ? md.slice(0, md.lastIndexOf('/') + 1) : '';
-    const entries = tree.filter(e => e.type === 'blob' && e.mode !== '120000' && e.path.startsWith(dir) && !/(^|\/)(\.git|node_modules)\//.test(e.path));
+    let entries = tree.filter(e => keep(e) && e.path.startsWith(dir));
+    if (truncated) { // a lista do GitHub veio cortada: pede só a pasta da skill, que vem inteira
+      const node = dir && tree.find(e => e.type === 'tree' && e.path === dir.slice(0, -1));
+      if (!node) throw tooBigError();
+      const sub = await gh(`/repos/${source}/git/trees/${node.sha}?recursive=1`);
+      entries = (sub.tree || []).filter(keep).map(e => ({ ...e, path: dir + e.path }));
+    }
+    // baixa da mesma fonte da lista (mesma versão); o jsDelivr recusa arquivos acima de 20 MB, que vêm do GitHub
+    const cdnUrl = file => `https://cdn.jsdelivr.net/gh/${source}@HEAD/${file.split('/').map(encodeURIComponent).join('/')}`;
     const bytes = entries.reduce((n, e) => n + (e.size || 0), 0);
     if (entries.length > MAX_FILES || bytes > MAX_BYTES) {
       throw new Error(`Esta skill é grande demais para instalar pelo navegador (limite: ${MAX_FILES} arquivos e ${MAX_BYTES / 1048576} MB).`);
@@ -239,7 +252,8 @@
     const worker = async () => {
       while (next < entries.length) {
         const i = next++;
-        const res = await realFetch(rawUrl(source, entries[i].path));
+        let res = await realFetch(from === 'jsdelivr' ? cdnUrl(entries[i].path) : rawUrl(source, entries[i].path));
+        if (!res.ok && from === 'jsdelivr') res = await realFetch(rawUrl(source, entries[i].path));
         if (!res.ok) throw new Error(`Não consegui baixar ${entries[i].path} (${res.status}).`);
         files[i] = { path: entries[i].path.slice(dir.length), data: bytesToB64(await res.arrayBuffer()) };
       }
@@ -376,7 +390,7 @@
   }
   async function writeSkill(h, skillId, source, files) {
     const skills = await step('abrir a pasta skills', () => skillsDirOf(h, true));
-    try { await skills.getDirectoryHandle(skillId); throw new Error(`"${skillId}" já existe nessa pasta.`); }
+    try { await skills.getDirectoryHandle(skillId); throw Object.assign(new Error(`"${skillId}" já existe nessa pasta.`), { code: 'exists' }); }
     catch (e) { if (e.name !== 'NotFoundError') throw e; }
     for (const f of files) if (!safePath(f.path)) throw new Error(`Caminho de arquivo inválido: ${f.path}`);
     const root = await step(`criar a pasta ${skillId}`, () => skills.getDirectoryHandle(skillId, { create: true }));
@@ -421,7 +435,7 @@
       await w.write('ok'); await w.close();
       await skills.removeEntry(probe);
     } catch (e) {
-      if (e.name !== 'NoModificationAllowedError') throw e;
+      if (e.name !== 'NoModificationAllowedError') throw Object.assign(new Error(e.message), { name: e.name, code: 'write' }); // outro erro de gravação: a tela roda o teste
       throw Object.assign(new Error('O sistema entregou a pasta ao navegador só para leitura.'), { status: 403, code: 'readonly', folder: h.name });
     }
   }
@@ -436,7 +450,9 @@
     const h = await folder({ ask: true }); // antes de qualquer espera: precisa do clique
     await assertWritable(h);
     const { files } = await skillFiles(source, skillId);
-    const skipped = await writeSkill(h, skillId, source, files);
+    let skipped;
+    try { skipped = await writeSkill(h, skillId, source, files); }
+    catch (e) { throw Object.assign(new Error(e.message), { name: e.name, code: typeof e.code === 'string' ? e.code : 'write' }); }
     return { ok: true, files: files.length - skipped.length, skipped };
   }
 
@@ -565,7 +581,7 @@
       if (init.body) { try { body = JSON.parse(init.body); } catch {} }
       return json(await route(url.pathname, url.searchParams, (init.method || 'GET').toUpperCase(), body));
     } catch (e) {
-      return fail(e.message || 'Erro inesperado', e.status || 500, e.code ? { code: e.code, folder: e.folder } : {});
+      return fail(e.message || 'Erro inesperado', e.status || 500, typeof e.code === 'string' ? { code: e.code, folder: e.folder } : {});
     }
   };
 })();

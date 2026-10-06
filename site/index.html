@@ -292,6 +292,9 @@
   .guide .talk.good { border-top: 3px solid var(--orange); }
   .guide .talk .say { margin: 12px 0 0; }
   .guide .cap { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .guide .cap a { color: var(--orange); }
+  .guide .video { aspect-ratio: 16 / 9; width: 100%; max-width: 860px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--panel); margin-top: 4px; }
+  .guide .video iframe { width: 100%; height: 100%; border: 0; display: block; }
   .guide .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 40px; }
   .guide .faq div { display: block; border: 0; padding: 0; font: inherit; }
   .guide h2 { margin: 0 0 12px; font-family: var(--display); font-variation-settings: "wdth" 75; font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: .01em; }
@@ -477,6 +480,13 @@
       <h1>O que são <em>skills</em> e como usar</h1>
       <p class="lead">Uma skill é um manual que o Claude lê quando precisa fazer uma tarefa específica. Instalar é o primeiro passo; o segundo é saber pedir. Esta página explica os dois, sem termos técnicos.</p>
     </header>
+
+    <section>
+      <h2>Veja em vídeo</h2>
+      <p>Prefere assistir? Este vídeo, em português, mostra como usar skills no Claude.</p>
+      <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/Cr7d3b5qufI" title="Claude Skills 2.0 | Como usar melhor que 99% das pessoas (NoCode StartUp)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <p class="cap">Do canal NoCode StartUp no YouTube: <a href="https://www.youtube.com/watch?v=Cr7d3b5qufI" target="_blank" rel="noopener">Claude Skills 2.0 | Como usar melhor que 99% das pessoas</a>.</p>
+    </section>
 
     <section class="cols">
       <div>
@@ -1479,7 +1489,12 @@ $('dAction').onclick = async () => {
       $('dAlt').hidden = false; $('dAltCmd').hidden = !SHELL_OK; $('dAltPick').hidden = false;
       logLine('Siga o passo a passo que abriu para liberar a gravação (uma vez só).');
       openReadonlyGuide(s, e.folder);
-    } else if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: outras saídas
+    } else if (!removing && STATIC && (e.code === 'ratelimit' || e.code === 'toobig')) { // não deu para listar os arquivos pelo navegador
+      $('dAlt').hidden = false; $('dAltCmd').hidden = !SHELL_OK;
+      logLine(SHELL_OK
+        ? 'Use "Copiar comando de instalação" abaixo: o terminal baixa a skill com o git, que não tem esse limite.'
+        : 'Você pode pedir ao Claude Code (abaixo) para instalar, ou tentar de novo mais tarde.');
+    } else if (!removing && STATIC && window.CAT?.supported && e.code === 'write') { // o navegador recusou gravar: outras saídas
       $('dAlt').hidden = false;
       $('dAltCmd').hidden = !SHELL_OK;
       logLine(SHELL_OK
