@@ -606,6 +606,7 @@ description: Cria relatórios em PDF a partir
     <div class="altrow" id="dAlt" hidden>
       <button class="toggle" id="dAltCli" type="button">Abrir no terminal</button>
       <button class="toggle" id="dAltCopy" type="button">Copiar pedido</button>
+      <button class="toggle" id="dAltPick" type="button" hidden>Escolher a pasta de novo</button>
     </div>
     <p class="note flat" id="dNote" hidden></p>
     <div class="usebox" id="dUse" hidden>
@@ -1313,6 +1314,7 @@ function syncDrawer() {
   const note = $('dNote');
   note.hidden = true;
   $('dAlt').hidden = !(STATIC && s.source && !isInst(s) && window.CAT && !window.CAT.supported);
+  $('dAltPick').hidden = true;
   if (STATIC && s.source && !isInst(s) && window.CAT) {
     const text = !window.CAT.supported
       ? (brave.is
@@ -1439,8 +1441,9 @@ $('dAction').onclick = async () => {
         for (const l of lines) logLine('  ' + l, /: ok|escolhida|permissão: granted/.test(l) ? '' : 'bad');
         if (lines.allDenied) {
           logLine('Nenhuma gravação funcionou nessa pasta. O navegador está sem acesso de escrita a ela.', 'bad');
+          $('dAltPick').hidden = false;
           logLine(/Linux/.test(navigator.userAgent)
-            ? 'No Linux isso acontece com navegadores instalados como snap ou flatpak: eles ficam isolados e não enxergam pastas ocultas como .claude. Instale a versão .deb do navegador (no Brave: brave.com/linux) ou use o Claude Code pelos botões abaixo.'
+            ? 'No Linux isso acontece com navegadores instalados como snap ou flatpak: o sistema entrega a pasta escolhida ao navegador só para leitura. Saídas: usar a versão .deb do navegador, o Claude Code pelos botões abaixo, ou liberar a gravação só na pasta skills (escolha-a em "Escolher a pasta de novo" e rode scripts/liberar-gravacao-linux.py, veja o README).'
             : 'Confira se a pasta não está protegida (somente leitura) ou se o antivírus não está bloqueando o navegador. Enquanto isso, use o Claude Code pelos botões abaixo.');
         }
       } catch (err) { logLine('  não consegui testar: ' + err.message, 'bad'); }
@@ -1451,6 +1454,15 @@ $('dAction').onclick = async () => {
 };
 $('dFav').onclick = () => state.current && toggleList('favorites', state.current);
 $('dAltCli').onclick = () => { const s = state.current; if (!s) return; logReset(); logLine('✓ abrindo o Claude Code no terminal com o pedido pronto', 'ok'); logLine('Funciona se o Claude Code já foi usado nesta máquina. Confira o texto e aperte Enter.'); openLink(deepLink(s, 'cli')); };
+$('dAltPick').onclick = async () => {
+  try {
+    const h = await window.CAT.connect();
+    logReset();
+    logLine(`✓ pasta "${h.name}" escolhida`, 'ok');
+    if (h.name !== 'skills') logLine('Dica: escolher só a pasta skills (~/.claude/skills) dá menos acesso ao navegador do que a .claude inteira.');
+    logLine('Se a gravação continuar recusada (snap/flatpak), rode scripts/liberar-gravacao-linux.py e tente instalar de novo.');
+  } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); }
+};
 $('dAltCopy').onclick = async () => { const s = state.current; if (!s) return; logReset(); if (await copyRequest(s)) logLine('✓ pedido copiado. Cole no Claude Code e aperte Enter.', 'ok'); logLine(claudeRequest(s)); };
 $('close').onclick = () => $('dlg').close();
 $('dlg').addEventListener('click', e => { if (e.target === $('dlg')) $('dlg').close(); });
@@ -1497,7 +1509,7 @@ function renderFolderDialog(onPick, error) {
   const ol = el('ol', { className: 'steps' },
     el('li', {}, 'Clique em ', el('b', { textContent: 'Escolher pasta' }), '.'),
     el('li', {}, 'Vá até a pasta ', el('code', { textContent: hint.path }), ' ', copy, el('br'), hint.tip),
-    el('li', {}, 'Selecione a ', el('b', { textContent: '.claude' }), ' (ou a ', el('b', { textContent: 'skills' }), ', se já existir) e confirme em ', el('b', { textContent: 'Permitir' }), '.'));
+    el('li', {}, 'Abra a ', el('b', { textContent: '.claude' }), ' e selecione a pasta ', el('b', { textContent: 'skills' }), ' (é a que dá menos acesso ao navegador; se ela ainda não existir, selecione a própria ', el('b', { textContent: '.claude' }), ') e confirme em ', el('b', { textContent: 'Permitir' }), '.'));
   $('fdBody').replaceChildren(
     el('p', { className: 'desc', textContent: 'Para instalar com um clique, o navegador precisa de permissão para gravar na pasta de skills do Claude Code. Você faz isso só uma vez.' }),
     ol, ...(error ? [el('p', { className: 'err', textContent: error })] : []), pick,
