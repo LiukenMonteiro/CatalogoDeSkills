@@ -467,12 +467,14 @@
     let skills;
     try { skills = await skillsDirOf(h, true); out.push(`pasta skills: ok (${skills.name})`); }
     catch (e) { out.push(`pasta skills: ${e.name}: ${e.message}`); return out; }
-    const probe = async (label, fn) => { try { await fn(); out.push(`${label}: ok`); } catch (e) { out.push(`${label}: ${e.name}: ${e.message}`); } };
+    let total = 0, failed = 0;
+    const probe = async (label, fn) => { total++; try { await fn(); out.push(`${label}: ok`); } catch (e) { failed++; out.push(`${label}: ${e.name}: ${e.message}`); } };
     const put = async (dir, name, text) => { const w = await (await dir.getFileHandle(name, { create: true })).createWritable(); await w.write(text); await w.close(); };
     await probe('gravar arquivo comum', async () => { await put(skills, 'catalogo-teste.txt', 'x'); await skills.removeEntry('catalogo-teste.txt'); });
     await probe('gravar arquivo oculto (.nome)', async () => { await put(skills, '.catalogo-teste', 'x'); await skills.removeEntry('.catalogo-teste'); });
     await probe('criar subpasta e gravar dentro', async () => { const d = await skills.getDirectoryHandle('catalogo-teste-dir', { create: true }); await put(d, 'a.txt', 'x'); await skills.removeEntry('catalogo-teste-dir', { recursive: true }); });
     await probe('gravar arquivo de 3 MB', async () => { const w = await (await skills.getFileHandle('catalogo-teste.bin', { create: true })).createWritable(); await w.write(new Uint8Array(3 << 20)); await w.close(); await skills.removeEntry('catalogo-teste.bin'); });
+    out.allDenied = total > 0 && failed === total; // nada grava: o navegador está sem acesso à pasta (ex.: isolado por snap/flatpak)
     return out;
   }
 

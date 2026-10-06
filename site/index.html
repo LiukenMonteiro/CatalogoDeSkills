@@ -1434,8 +1434,16 @@ $('dAction').onclick = async () => {
       $('dAlt').hidden = false;
       logLine('O navegador não deixou gravar. Use "Abrir no terminal" ou "Copiar pedido" abaixo: o Claude Code instala sem depender do navegador.');
       logLine('Teste de gravação nesta pasta (copie e me envie se o erro continuar):');
-      try { for (const l of await window.CAT.diagnose()) logLine('  ' + l, /: ok|escolhida|permissão: granted/.test(l) ? '' : 'bad'); }
-      catch (err) { logLine('  não consegui testar: ' + err.message, 'bad'); }
+      try {
+        const lines = await window.CAT.diagnose();
+        for (const l of lines) logLine('  ' + l, /: ok|escolhida|permissão: granted/.test(l) ? '' : 'bad');
+        if (lines.allDenied) {
+          logLine('Nenhuma gravação funcionou nessa pasta. O navegador está sem acesso de escrita a ela.', 'bad');
+          logLine(/Linux/.test(navigator.userAgent)
+            ? 'No Linux isso acontece com navegadores instalados como snap ou flatpak: eles ficam isolados e não enxergam pastas ocultas como .claude. Instale a versão .deb do navegador (no Brave: brave.com/linux) ou use o Claude Code pelos botões abaixo.'
+            : 'Confira se a pasta não está protegida (somente leitura) ou se o antivírus não está bloqueando o navegador. Enquanto isso, use o Claude Code pelos botões abaixo.');
+        }
+      } catch (err) { logLine('  não consegui testar: ' + err.message, 'bad'); }
       logLine('  navegador: ' + navigator.userAgent.replace(/^Mozilla\/5.0 /, ''));
     }
   }

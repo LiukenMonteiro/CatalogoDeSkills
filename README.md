@@ -112,6 +112,7 @@ O catálogo só lê o seu nome e a sua foto públicos.
 ## Limitações conhecidas
 
 - Arquivos gravados pelo navegador **não recebem o bit de executável** (o navegador não consegue defini-lo). Skills que trazem scripts feitos para rodar direto (`./script.sh`) podem precisar de `chmod +x`; os que rodam com `python script.py` ou `bash script.sh` funcionam normalmente.
+- **Linux com navegador snap ou flatpak** (por exemplo o Brave instalado pela loja do Ubuntu): o navegador roda isolado e não consegue gravar em pastas ocultas como `~/.claude`, então a instalação com um clique falha com *"An attempt was made to write to a file or directory…"*. Instale a versão `.deb` do navegador ([brave.com/linux](https://brave.com/linux/)) ou use **Instalar com o Claude Code** / o modo local (`node server.js`).
 - A busca procura no **nome, no repositório e nas palavras-chave** das skills, não no texto completo das descrições.
 - Os dados do repositório (estrelas, linguagem) vêm da API pública do GitHub, que limita a 60 consultas por hora por computador. Quando o limite estoura, a descrição e a instalação continuam funcionando por uma reserva (jsDelivr); só as estrelas somem por alguns minutos. A tradução gratuita de reserva (MyMemory) também tem cota diária; o tradutor embutido do Chrome não tem limite.
 - O catálogo é atualizado a cada 6 horas, não em tempo real.
