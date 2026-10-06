@@ -293,7 +293,9 @@
   .guide .talk .say { margin: 12px 0 0; }
   .guide .cap { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
   .guide .cap a { color: var(--orange); }
-  .guide .video { aspect-ratio: 16 / 9; width: 100%; max-width: 860px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--panel); margin-top: 4px; }
+  .guide .video { aspect-ratio: 16 / 9; width: 100%; max-width: 860px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--panel); margin: 4px auto 0; }
+  .guide .vid { text-align: center; }
+  .guide .vid p { margin-left: auto; margin-right: auto; }
   .guide .video iframe { width: 100%; height: 100%; border: 0; display: block; }
   .guide .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 40px; }
   .guide .faq div { display: block; border: 0; padding: 0; font: inherit; }
@@ -581,7 +583,7 @@ description: Cria relatórios em PDF a partir
       </dl>
     </section>
 
-    <section>
+    <section class="vid">
       <h2>Veja em vídeo</h2>
       <p>Prefere assistir? Este vídeo, em português, mostra como usar skills no Claude.</p>
       <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/Cr7d3b5qufI" title="Claude Skills 2.0 | Como usar melhor que 99% das pessoas (NoCode StartUp)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
