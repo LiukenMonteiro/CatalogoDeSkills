@@ -14,6 +14,9 @@ Passo a passo:
        python3 scripts/liberar-gravacao-linux.py --aplicar
   4. Volte ao site e instale de novo.
 
+Rode num terminal do sistema (Ctrl+Alt+T). O terminal do VS Code instalado por snap também é isolado,
+e o sistema recusa o pedido vindo dele.
+
 Só mexe em pastas dentro de ~/.claude. Para desfazer, escolha a pasta de novo ou use
 org.freedesktop.portal.Documents.RevokePermissions (veja o README).
 """
@@ -36,8 +39,24 @@ def gdbus(base, method, *args):
     except FileNotFoundError:
         sys.exit('Não encontrei o comando gdbus. No Ubuntu/Debian ele vem no pacote libglib2.0-bin.')
     if r.returncode != 0:
-        sys.exit(f'O sistema recusou: {(r.stderr or r.stdout).strip()}')
+        msg = (r.stderr or r.stdout).strip()
+        if 'NotAllowed' in msg:
+            app = isolated_app()
+            sys.exit('O sistema não deixou este terminal mudar a permissão do navegador.\n'
+                     + (f'Este terminal roda dentro de um aplicativo isolado ({app}), como o terminal do VS Code instalado por snap.\n' if app else '')
+                     + 'Abra um terminal do sistema (Ctrl+Alt+T), fora do VS Code, e rode o mesmo comando de novo.')
+        sys.exit(f'O sistema recusou: {msg}')
     return r.stdout
+
+
+def isolated_app():
+    """Nome do snap/flatpak em que este terminal roda, se houver (o portal recusa pedidos vindos dele)."""
+    try:
+        cgroup = open('/proc/self/cgroup', encoding='utf8').read()
+    except OSError:
+        return ''
+    m = re.search(r'(snap\.[\w-]+\.[\w-]+|app-flatpak-[\w.-]+)', cgroup)
+    return re.sub(r'-[0-9a-f]{8}-[0-9a-f-]+$', '', m.group(1)) if m else ''  # tira o código da sessão
 
 
 def lookup(doc_id):
