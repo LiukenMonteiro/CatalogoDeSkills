@@ -339,6 +339,8 @@
   .steps li code { word-break: break-all; }
   #dStar[hidden], #dNote[hidden], #dAlt[hidden] { display: none; }
   .altrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .altrow .wide { grid-column: 1 / -1; }
+  .claudeopts .altrow { margin-top: 10px; }
 
   /* login */
   .stack { display: flex; flex-direction: column; gap: 18px; }
@@ -604,9 +606,16 @@ description: Cria relatórios em PDF a partir
     </dl>
     <button class="btn" id="dAction" type="button">Instalar</button>
     <div class="altrow" id="dAlt" hidden>
-      <button class="toggle" id="dAltCli" type="button">Abrir no terminal</button>
-      <button class="toggle" id="dAltCopy" type="button">Copiar pedido</button>
-      <button class="toggle" id="dAltPick" type="button" hidden>Escolher a pasta de novo</button>
+      <button class="toggle wide" id="dAltCmd" type="button" hidden>Copiar comando de instalação</button>
+      <button class="toggle wide" id="dAltPick" type="button" hidden>Escolher a pasta de novo</button>
+      <details class="claudeopts wide" id="dAltClaude">
+        <summary>Prefere pedir ao Claude Code? (gasta tokens)</summary>
+        <div class="altrow">
+          <button class="toggle" id="dAltVs" type="button">Abrir no VS Code</button>
+          <button class="toggle" id="dAltCli" type="button">Abrir no terminal</button>
+          <button class="toggle wide" id="dAltCopy" type="button">Copiar pedido</button>
+        </div>
+      </details>
     </div>
     <p class="note flat" id="dNote" hidden></p>
     <div class="usebox" id="dUse" hidden>
@@ -1314,13 +1323,14 @@ function syncDrawer() {
   const note = $('dNote');
   note.hidden = true;
   $('dAlt').hidden = !(STATIC && s.source && !isInst(s) && window.CAT && !window.CAT.supported);
+  $('dAltCmd').hidden = true; // sem gravação em pasta, o botão principal já copia o comando
   $('dAltPick').hidden = true;
   if (STATIC && s.source && !isInst(s) && window.CAT) {
     const text = !window.CAT.supported
       ? (brave.is
-        ? 'Sem mexer em nada, o botão acima abre o Claude Code com o pedido pronto e você só aperta Enter. Quer o clique único, como no Chrome? O Brave deixa a gravação em pasta desligada; ligar leva 30 segundos, uma vez só.'
-        : 'Este navegador não grava na sua pasta. O botão acima abre o Claude Code com o pedido pronto e você só aperta Enter. No Chrome ou no Edge a instalação é com um clique.')
-      : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta .claude do seu computador. É uma vez só.' : '';
+        ? `${SHELL_OK ? 'Por enquanto, o botão acima copia um comando para colar no terminal (precisa do git; não usa o Claude).' : 'Sem mexer em nada, o botão acima abre o Claude Code com o pedido pronto e você só aperta Enter.'} Quer o clique único, como no Chrome? O Brave deixa a gravação em pasta desligada; ligar leva 30 segundos, uma vez só.`
+        : `Este navegador não grava na sua pasta. ${SHELL_OK ? 'O botão acima copia um comando para colar no terminal (precisa do git; não usa o Claude).' : 'O botão acima abre o Claude Code com o pedido pronto e você só aperta Enter.'} No Chrome ou no Edge a instalação é com um clique.`)
+      : !window.CAT.hasHandle() ? 'Na primeira vez você escolhe a pasta de skills (~/.claude/skills) do seu computador. É uma vez só.' : '';
     if (text) {
       note.replaceChildren(text);
       if (!window.CAT.supported && brave.is) { const b = el('button', { className: 'linkbtn', type: 'button', textContent: ' Como ligar o clique único' }); b.onclick = openBraveGuide; note.append(b); }
@@ -1342,6 +1352,7 @@ async function openSkill(s) {
   $('dFav').hidden = local;
   $('dPreview').hidden = true; $('dPreview').open = false;
   logReset();
+  $('dAltClaude').open = !SHELL_OK;
   $('dStar').hidden = true;
   $('dlg').showModal();
   syncDrawer();
@@ -1365,7 +1376,7 @@ function setAction(s, busy) {
   b.hidden = !s.source && !inst;
   b.disabled = !!busy;
   b.className = 'btn' + (inst ? ' ghost' : '');
-  b.textContent = busy ? (inst ? 'Removendo…' : 'Instalando…') : (inst ? 'Desinstalar' : copyMode ? 'Instalar com o Claude Code' : 'Instalar');
+  b.textContent = busy ? (inst ? 'Removendo…' : 'Instalando…') : (inst ? 'Desinstalar' : copyMode ? (SHELL_OK ? 'Copiar comando de instalação' : 'Instalar com o Claude Code') : 'Instalar');
 }
 
 const claudeRequest = s => `Instale a skill "${s.skillId}" do repositório https://github.com/${s.source} na minha pasta global de skills (~/.claude/skills/${s.skillId}). Faça um clone raso, copie só a pasta dessa skill, leia o SKILL.md e me avise se houver algo suspeito antes de eu usar.`;
@@ -1373,6 +1384,27 @@ const claudeRequest = s => `Instale a skill "${s.skillId}" do repositório https
 const deepLink = (s, kind) => kind === 'cli'
   ? `claude-cli://open?q=${encodeURIComponent(claudeRequest(s))}`
   : `vscode://anthropic.claude-code/open?prompt=${encodeURIComponent(claudeRequest(s))}`;
+// Instalar pelo terminal, sem o navegador e sem o Claude: clona o repositório e copia só a pasta da skill,
+// com a mesma busca do servidor local (pasta com o nome da skill, ou SKILL.md com esse name). Linux e macOS.
+const SHELL_OK = !/Windows/i.test(navigator.userAgent);
+const SRC_OK = /^[A-Za-z0-9][A-Za-z0-9_.-]*\/[A-Za-z0-9_.-]+$/, ID_OK = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
+function shellCommand(s) {
+  if (!SRC_OK.test(s.source || '') || !ID_OK.test(s.skillId || '')) return null; // só caracteres seguros entram no comando
+  const src = s.source, id = s.skillId, re = id.replace(/\./g, '\\.'), dest = `~/.claude/skills/${id}`;
+  return String.raw`d=$(mktemp -d) && git clone --depth 1 --quiet https://github.com/${src}.git "$d" && s=$(find "$d" -name SKILL.md -not -path '*/.git/*' -not -path '*/node_modules/*' | while IFS= read -r m; do p=$(dirname "$m"); if [ "$(basename "$p")" = '${id}' ] || grep -qE "^name:[[:space:]]*[\"']?${re}[\"']?[[:space:]]*$" "$m"; then echo "$p"; fi; done | awk '{ print length($0) "\t" $0 }' | sort -n | head -1 | cut -f2-) && if [ -z "$s" ]; then echo 'Skill ${id} não encontrada no repositório.'; elif [ -e ${dest} ]; then echo '${id} já existe em ~/.claude/skills'; else mkdir -p ~/.claude/skills && cp -r "$s" ${dest} && rm -rf ${dest}/.git && find ${dest} -type l -delete && printf '{"source":"${src}","skillId":"${id}","installedAt":"%s","via":"comando"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ${dest}/.catalogo-skill.json && echo 'Instalada em ${dest}'; fi; rm -rf "$d"`;
+}
+async function copyCommand(s) {
+  const cmd = shellCommand(s);
+  logReset();
+  if (!cmd) { logLine('Não consegui montar o comando para esta skill.', 'bad'); return false; }
+  try { await navigator.clipboard.writeText(cmd); }
+  catch { logLine('Não consegui copiar sozinho. Selecione o comando abaixo e copie:', 'bad'); logLine(cmd); return false; }
+  logLine('✓ comando copiado', 'ok');
+  logLine(`Abra um terminal, cole (${/Mac/i.test(navigator.userAgent) ? 'Cmd+V' : 'Ctrl+Shift+V'}) e aperte Enter. Ele baixa a skill do GitHub e copia para ~/.claude/skills/${s.skillId}. Precisa do git; não usa o Claude.`);
+  logLine('Depois a skill já vale no Claude Code (se não aparecer, reinicie-o).');
+  toast('Comando copiado. Cole no terminal.');
+  return true;
+}
 function openLink(url) { const a = el('a', { href: url }); document.body.append(a); a.click(); a.remove(); }
 async function copyRequest(s) {
   try { await navigator.clipboard.writeText(claudeRequest(s)); toast('Pedido copiado. Cole no Claude Code.'); return true; }
@@ -1391,8 +1423,9 @@ let confirmTimer;
 $('dAction').onclick = async () => {
   const s = state.current; if (!s) return;
   const removing = isInst(s);
-  if (!removing && STATIC && window.CAT && !window.CAT.supported) { // navegador sem acesso à pasta: o Claude Code instala
-    logReset();
+  if (!removing && STATIC && window.CAT && !window.CAT.supported) { // navegador sem acesso à pasta
+    if (SHELL_OK) { await copyCommand(s); return; } // o terminal instala, sem o Claude
+    logReset(); // Windows: o Claude Code instala
     logLine(`✓ abrindo o Claude Code (VS Code) com o pedido pronto`, 'ok');
     logLine('Confira o texto que apareceu e aperte Enter. O Claude baixa a skill para a sua pasta e confere o conteúdo antes.');
     logLine('Nada abriu? Abra o VS Code com a extensão Claude Code, ou use "Abrir no terminal" ou "Copiar pedido" logo abaixo.');
@@ -1422,7 +1455,7 @@ $('dAction').onclick = async () => {
         logLine(`⚠ ${r.skipped.length} arquivo(s) não puderam ser gravados e foram pulados:`, 'bad');
         for (const k of r.skipped.slice(0, 8)) logLine(`  ${k.path} — ${k.reason}`);
         if (r.skipped.length > 8) logLine(`  … e mais ${r.skipped.length - 8}`);
-        logLine('A skill foi instalada sem eles. Se ela precisar desses arquivos, tente de novo ou use "Instalar com o Claude Code".');
+        logLine('A skill foi instalada sem eles. Se ela precisar desses arquivos, desinstale e tente de novo.');
       }
       logLine('Já deve estar disponível no Claude Code. Se não aparecer, reinicie-o.');
       showStarCta();
@@ -1434,7 +1467,10 @@ $('dAction').onclick = async () => {
     logLine(`✗ ${e.message}`, 'bad');
     if (!removing && STATIC && window.CAT?.supported && !/cancelada/.test(e.message)) { // o navegador recusou gravar: o Claude Code instala no lugar
       $('dAlt').hidden = false;
-      logLine('O navegador não deixou gravar. Use "Abrir no terminal" ou "Copiar pedido" abaixo: o Claude Code instala sem depender do navegador.');
+      $('dAltCmd').hidden = !SHELL_OK;
+      logLine(SHELL_OK
+        ? 'O navegador não deixou gravar. Use "Copiar comando de instalação" abaixo: o terminal instala sem depender do navegador e sem o Claude.'
+        : 'O navegador não deixou gravar. Abra "Prefere pedir ao Claude Code?" abaixo para instalar sem depender do navegador.');
       logLine('Teste de gravação nesta pasta (copie e me envie se o erro continuar):');
       try {
         const lines = await window.CAT.diagnose();
@@ -1443,8 +1479,8 @@ $('dAction').onclick = async () => {
           logLine('Nenhuma gravação funcionou nessa pasta. O navegador está sem acesso de escrita a ela.', 'bad');
           $('dAltPick').hidden = false;
           logLine(/Linux/.test(navigator.userAgent)
-            ? 'No Linux isso acontece com navegadores instalados como snap ou flatpak: o sistema entrega a pasta escolhida ao navegador só para leitura. Saídas: usar a versão .deb do navegador, o Claude Code pelos botões abaixo, ou liberar a gravação só na pasta skills (escolha-a em "Escolher a pasta de novo" e rode scripts/liberar-gravacao-linux.py, veja o README).'
-            : 'Confira se a pasta não está protegida (somente leitura) ou se o antivírus não está bloqueando o navegador. Enquanto isso, use o Claude Code pelos botões abaixo.');
+            ? 'No Linux isso acontece com navegadores instalados como snap ou flatpak: o sistema entrega a pasta escolhida ao navegador só para leitura. Saídas: usar a versão .deb do navegador, o comando de terminal abaixo, ou liberar a gravação só na pasta skills (escolha-a em "Escolher a pasta de novo" e rode scripts/liberar-gravacao-linux.py, veja o README).'
+            : `Confira se a pasta não está protegida (somente leitura) ou se o antivírus não está bloqueando o navegador. Enquanto isso, use ${SHELL_OK ? 'o comando de terminal' : 'o Claude Code'} abaixo.`);
         }
       } catch (err) { logLine('  não consegui testar: ' + err.message, 'bad'); }
       logLine('  navegador: ' + navigator.userAgent.replace(/^Mozilla\/5.0 /, ''));
@@ -1453,6 +1489,8 @@ $('dAction').onclick = async () => {
   setAction(s);
 };
 $('dFav').onclick = () => state.current && toggleList('favorites', state.current);
+$('dAltCmd').onclick = () => { const s = state.current; if (s) copyCommand(s); };
+$('dAltVs').onclick = () => { const s = state.current; if (!s) return; logReset(); logLine('✓ abrindo o Claude Code (VS Code) com o pedido pronto', 'ok'); logLine('Confira o texto que apareceu e aperte Enter.'); openLink(deepLink(s, 'vscode')); };
 $('dAltCli').onclick = () => { const s = state.current; if (!s) return; logReset(); logLine('✓ abrindo o Claude Code no terminal com o pedido pronto', 'ok'); logLine('Funciona se o Claude Code já foi usado nesta máquina. Confira o texto e aperte Enter.'); openLink(deepLink(s, 'cli')); };
 $('dAltPick').onclick = async () => {
   try {
